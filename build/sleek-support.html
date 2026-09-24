@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DropyWebSupport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+        --background: #fbf7f0;
+        --foreground: #14213d;
+        --primary: #f2643d;
+        --primary-foreground: #ffffff;
+        --secondary: #146b68;
+        --secondary-foreground: #ffffff;
+        --muted: #ede5d8;
+        --muted-foreground: #5c6479;
+        --accent: #146b68;
+        --accent-foreground: #fbf7f0;
+        --destructive: #c94646;
+        --card: #ffffff;
+        --card-foreground: #14213d;
+        --popover: #ffffff;
+        --popover-foreground: #14213d;
+        --border: #e8dfd1;
+        --input: #f3ece0;
+        --ring: #f2643d;
+        --chart-1: #f2643d;
+        --chart-2: #238a86;
+        --chart-3: #e9f25b;
+        --chart-4: #45618d;
+        --chart-5: #d99a5b;
+
+        --font-sans: "Manrope";
+        --font-heading: "Fraunces";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 1rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground flex flex-col"
+    >
+      <header
+        class="sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b border-border shadow-2xs"
+      >
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black shadow-xs"
+            >
+              <iconify-icon icon="ph:tag-chevron-fill" width="22" height="22"></iconify-icon>
+            </div>
+            <span class="font-heading font-extrabold text-xl tracking-tight text-foreground"
+              >Dropy</span
+            >
+          </div>
+          <nav class="flex items-center gap-3 sm:gap-6">
+            <a
+              href="#"
+              class="text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >Biznes üçün</a
+            ><a href="#" class="text-xs sm:text-sm font-semibold text-primary">Dəstək</a
+            ><a
+              href="#"
+              class="px-3.5 sm:px-4 py-2 rounded-xl bg-primary text-primary-foreground font-heading font-bold text-xs sm:text-sm shadow-xs hover:opacity-90 transition-opacity flex items-center gap-1.5"
+              ><iconify-icon icon="ph:download-simple-bold" width="15" height="15"></iconify-icon
+              ><span>Tətbiqi yüklə</span></a
+            >
+          </nav>
+        </div>
+      </header>
+      <main class="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-10 sm:py-16 space-y-10">
+        <div class="text-center space-y-3 max-w-2xl mx-auto">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold"
+          >
+            <iconify-icon icon="ph:lifebuoy-bold" width="14" height="14"></iconify-icon
+            ><span>Kömək Mərkəzi</span>
+          </div>
+          <h1
+            class="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight"
+          >
+            Dəstək və Tez-tez Verilən Suallar
+          </h1>
+          <p class="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Dropy tətbiqi, mağaza qeydiyyatı və ya endirim kampaniyaları ilə bağlı suallarınıza ən
+            qısa zamanda cavab tapın.
+          </p>
+        </div>
+        <div
+          class="bg-card rounded-2xl sm:rounded-3xl border border-border p-6 sm:p-8 shadow-2xs space-y-4"
+        >
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div
+                class="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"
+              >
+                <iconify-icon
+                  icon="ph:envelope-simple-open-bold"
+                  width="24"
+                  height="24"
+                ></iconify-icon>
+              </div>
+              <div>
+                <h2 class="font-heading font-bold text-base text-foreground">Bizimlə Əlaqə</h2>
+                <p class="text-xs sm:text-sm text-primary font-bold">support@dropy.az</p>
+              </div>
+            </div>
+            <a
+              href="mailto:support@dropy.az"
+              class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-heading font-bold text-xs sm:text-sm shadow-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
+              ><iconify-icon icon="ph:paper-plane-tilt-bold" width="14" height="14"></iconify-icon
+              ><span>E-poçt Yaz</span></a
+            >
+          </div>
+          <div
+            class="pt-3 border-t border-border/80 flex items-center gap-2 text-xs text-muted-foreground"
+          >
+            <iconify-icon
+              icon="ph:clock-bold"
+              width="14"
+              height="14"
+              class="text-muted-foreground"
+            ></iconify-icon
+            ><span
+              >Müraciətlərə adətən <strong>1-2 iş günü</strong> ərzində baxılır və
+              cavablandırılır.</span
+            >
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="space-y-1">
+            <h2 class="font-heading font-extrabold text-xl sm:text-2xl text-foreground">
+              Tez-tez Verilən Suallar
+            </h2>
+            <p class="text-xs sm:text-sm text-muted-foreground">
+              İstifadəçilərimiz və mağaza sahibləri tərəfindən ən çox soruşulanlar
+            </p>
+          </div>
+          <div class="space-y-3">
+            <details
+              open
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >1</span
+                  ><span>Dropy nədir və necə işləyir?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Dropy müstəqil endirim və kampaniya aqreqatorudur. Platforma mağazaların rəsmi
+                saytlarındakı və sosial şəbəkələrindəki aktual endirim təkliflərini toplayır və
+                istifadəçilərə rahat şəkildə təqdim edir. Dropy birbaşa satış həyata keçirmir,
+                alıcını rəsmi mağazaya istiqamətləndirir.
+              </p>
+            </details>
+            <details
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >2</span
+                  ><span>Endirim məlumatı səhvdirsə və ya vaxtı bitibsə nə edim?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Hər bir kampaniya kartının və ya detallarının içindəki
+                <strong>bayraq (şikayət) düyməsi</strong> vasitəsilə dərhal bizə xəbər verə
+                bilərsiniz. Moderatorlarımız ən qısa zamanda məlumatı yoxlayaraq düzəliş edir və ya
+                bitmiş kampaniyanı arxivləşdirir.
+              </p>
+            </details>
+            <details
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >3</span
+                  ><span>Mağazamı platformaya necə əlavə edə bilərəm?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Mağazanızı mobil tətbiqdə <strong>Profil → Satıcı Ol / Mağazam</strong> bölməsindən
+                və ya veb saytımızdakı <strong>"Mağazanı əlavə et"</strong> düyməsi vasitəsilə
+                pulsuz əlavə edə bilərsiniz. Məlumatlar moderatorlarımız tərəfindən təsdiqləndikdən
+                sonra kampaniyalarınız tətbiqdə aktivləşəcək.
+              </p>
+            </details>
+            <details
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >4</span
+                  ><span>Hesabımı necə silə bilərəm?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Mobil tətbiqdə <strong>Profil → Hesabı Sil</strong> seçiminə daxil olaraq hesabınızı
+                və qeydiyyat zamanı yadda saxlanılmış bütün fərdi məlumatlarınızı dərhal və
+                birdəfəlik silə bilərsiniz.
+              </p>
+            </details>
+            <details
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >5</span
+                  ><span>Bildirişləri necə tənzimləyə və ya bağlaya bilərəm?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Mobil tətbiqin <strong>Profil → Bildiriş Ayarları</strong> bölməsinə daxil olaraq
+                yalnız izlədiyiniz mağazalar və ya maraqlandığınız kateqoriyalar üzrə bildirişləri
+                aktivləşdirə və ya istədiyiniz zaman tamamilə söndürə bilərsiniz.
+              </p>
+            </details>
+            <details
+              class="group bg-card rounded-2xl border border-border p-4.5 sm:p-5 transition-all open:border-primary/40 shadow-2xs"
+            >
+              <summary
+                class="flex items-center justify-between cursor-pointer font-heading font-bold text-sm sm:text-base text-foreground list-none select-none"
+              >
+                <span class="flex items-center gap-2"
+                  ><span
+                    class="size-6 rounded-md bg-primary/10 text-primary text-xs font-black flex items-center justify-center"
+                    >6</span
+                  ><span>Tətbiqdən istifadə ödənişlidirmi?</span></span
+                ><iconify-icon
+                  icon="ph:caret-down-bold"
+                  width="16"
+                  height="16"
+                  class="text-muted-foreground group-open:rotate-180 transition-transform"
+                ></iconify-icon>
+              </summary>
+              <p class="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pl-8">
+                Xeyr, Dropy tətbiqi istifadəçilər və mağaza sahibləri üçün
+                <strong>tamamilə pulsuzdur</strong>. Platforma daxilində yerləşdirilən rəsmi
+                tərəfdaş reklamları hesabına fəaliyyət göstərir.
+              </p>
+            </details>
+          </div>
+        </div>
+        <div
+          class="p-4 sm:p-5 rounded-2xl bg-muted/30 border border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground"
+        >
+          <div class="flex items-center gap-2">
+            <iconify-icon
+              icon="ph:shield-check-bold"
+              width="18"
+              height="18"
+              class="text-emerald-500"
+            ></iconify-icon
+            ><span>Məxfilik siyasəti və hüquqi qaydalarla tanış olmaq istəyirsiniz?</span>
+          </div>
+          <a
+            href="https://legal.dropy.az"
+            target="_blank"
+            class="font-bold text-primary hover:underline flex items-center gap-1"
+            ><span>legal.dropy.az səhifəsinə keç</span
+            ><iconify-icon icon="ph:arrow-square-out-bold" width="13" height="13"></iconify-icon
+          ></a>
+        </div>
+      </main>
+      <footer class="border-t border-border bg-card py-8 sm:py-10">
+        <div
+          class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground"
+        >
+          <div class="space-y-1 text-center sm:text-left">
+            <p class="font-bold text-foreground">© 2026 Omnigate MMC · Dropy</p>
+            <p class="text-[11px]">
+              Azərbaycanda endirim və kampaniyaların vahid aqreqator platforması
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs">
+            <a
+              href="https://legal.dropy.az"
+              target="_blank"
+              class="hover:text-foreground transition-colors"
+              >Məxfilik siyasəti</a
+            ><a
+              href="https://legal.dropy.az"
+              target="_blank"
+              class="hover:text-foreground transition-colors"
+              >İstifadə qaydaları</a
+            ><a
+              href="mailto:support@dropy.az"
+              class="hover:text-foreground transition-colors font-semibold text-primary"
+              >support@dropy.az</a
+            >
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

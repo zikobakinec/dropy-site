@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "python build.py && node -e \"require('fs').copyFileSync('icon.png','../assets/icon.png')\" && tailwindcss -i input.css -o ../assets/site.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4",
+    "tailwindcss": "^4"
+  }
+}
