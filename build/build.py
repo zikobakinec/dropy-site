@@ -117,7 +117,8 @@ for src, dest, meta in PAGES:
     html = re.sub(r"<title>.*?</title>", f"<title>{meta['title']}</title>", html, count=1)
     head_meta = (
         f'    <meta name="description" content="{meta["description"]}" />\n'
-        # Google Search Console ownership (verified 2026-10-16) — must stay.
+        # Google Search Console + Bing Webmaster ownership (verified 2026-10-16) — must stay.
+        '    <meta name="msvalidate.01" content="66354C6981813485B44002104AC64846" />\n'
         '    <meta name="google-site-verification" content="wCw_REq40FkF7cN2wkxMXclufNYFbNUp9BrQB-nxxAI" />\n'
         f'    <link rel="canonical" href="https://dropy.az{meta["path"]}" />\n'
         f'    <meta property="og:title" content="{meta["title"]}" />\n'
