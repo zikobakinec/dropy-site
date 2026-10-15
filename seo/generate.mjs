@@ -9,6 +9,7 @@
 //   /endirimler/<kateqoriya>/    one page per category
 //   /magazalar/                  every store with a page
 //   /magaza/<slug>/              one page per store
+//   /kampaniya/<ad>-<id>/        one page per campaign (kept 30 days after it ends)
 //   /sitemap.xml, /robots.txt
 // and a marked block of internal links + structured data in /index.html.
 //
@@ -27,6 +28,7 @@ const PLAY_URL = "https://play.google.com/store/apps/details?id=az.endirim.aqreq
 const FEED_SELECT =
   "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
+const ENDED_KEEP_DAYS = 30;
 
 const AZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
 
@@ -85,13 +87,49 @@ export function urlSlug(slug) {
   return String(slug ?? "").replace(/-seed$/, "");
 }
 
+const AZ_LATIN = { ə: "e", ı: "i", ö: "o", ü: "u", ş: "s", ç: "c", ğ: "g", i̇: "i" };
+
+/** URL-safe, readable slug from an Azerbaijani title ("Qadın köynəyi" → "qadin-koyneyi"). */
+export function slugify(text) {
+  return String(text ?? "")
+    .toLocaleLowerCase("az")
+    .replace(/[əıöüşçğ]/g, (ch) => AZ_LATIN[ch] ?? ch)
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60)
+    .replace(/-+$/g, "");
+}
+
+/** Stable page path for a campaign: readable title slug + the id's first 8 chars. */
+export function campaignPath(c) {
+  const slug = slugify(c.title);
+  return `/kampaniya/${slug ? `${slug}-` : ""}${String(c.id).slice(0, 8)}/`;
+}
+
+/** Old → new price from a "1800 ₼ → 1650 ₼" label, or undefined. */
+export function pricePair(text) {
+  const m = String(text ?? "").match(/([\d][\d\s.,]*)\s*(?:₼|AZN)?\s*→\s*([\d][\d\s.,]*)/i);
+  if (!m) return undefined;
+  const num = (s) => {
+    let t = s.replace(/\s/g, "").replace(/[.,]$/, "");
+    if (/,\d{1,2}$/.test(t)) t = t.replace(/\./g, "").replace(",", ".");
+    else t = t.replace(/,/g, "");
+    return Number(t);
+  };
+  const oldPrice = num(m[1]);
+  const newPrice = num(m[2]);
+  return Number.isFinite(oldPrice) && Number.isFinite(newPrice) && newPrice > 0 && newPrice < oldPrice ? { oldPrice, newPrice } : undefined;
+}
+
 export function isHttpUrl(u) {
   return typeof u === "string" && /^https?:\/\//i.test(u);
 }
 
 // ---------- page chrome ----------
 
-function head({ title, description, path, extra = "" }) {
+function head({ title, description, path, extra = "", image = `${SITE}/assets/icon.png` }) {
   return `<!DOCTYPE html>
 <html lang="az">
   <head>
@@ -104,7 +142,7 @@ function head({ title, description, path, extra = "" }) {
     <meta property="og:description" content="${esc(description)}" />
     <meta property="og:url" content="${SITE}${path}" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="${SITE}/assets/icon.png" />
+    <meta property="og:image" content="${esc(image)}" />
     <meta name="google-play-app" content="app-id=az.endirim.aqreqatoru" />
     <link rel="icon" href="/assets/icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -169,13 +207,13 @@ function breadcrumbs(trail) {
 function card(c, { showStore = true } = {}) {
   const store = c.stores ?? {};
   const img = isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : "/assets/icon.png";
-  const href = isHttpUrl(c.source_url) ? c.source_url : `/magaza/${urlSlug(store.slug)}/`;
+  const href = campaignPath(c);
   const ends = c.end_date && !c.end_date_estimated ? `<span class="ends">Son tarix: ${esc(azDate(c.end_date))}</span>` : "";
   return `        <article class="card">
-          <a class="card-img" href="${esc(href)}" rel="nofollow noopener" target="_blank"><img src="${esc(img)}" alt="${esc(c.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(c))}</span></a>
+          <a class="card-img" href="${esc(href)}"><img src="${esc(img)}" alt="${esc(c.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(c))}</span></a>
           <div class="card-body">
             ${showStore ? `<a class="store" href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}</a>` : ""}
-            <h3><a href="${esc(href)}" rel="nofollow noopener" target="_blank">${esc(c.title)}</a></h3>
+            <h3><a href="${esc(href)}">${esc(c.title)}</a></h3>
             ${ends}
           </div>
         </article>
@@ -196,7 +234,7 @@ function itemListLd(name, items) {
       "@type": "ListItem",
       position: i + 1,
       name: `${c.title} — ${badge(c)}`,
-      url: isHttpUrl(c.source_url) ? c.source_url : `${SITE}/magaza/${urlSlug(c.stores?.slug)}/`,
+      url: `${SITE}${campaignPath(c)}`,
     })),
   });
 }
@@ -327,7 +365,13 @@ export function buildSite(rows, now = new Date()) {
       foot(updated);
   }
 
-  return { pages, categories, stores, updated };
+  // Campaigns
+  for (const c of campaigns) {
+    const similar = spreadByStore(byCategory.get(c.categories.slug).items.filter((o) => o.id !== c.id && o.stores.slug !== c.stores.slug)).slice(0, 4);
+    pages[campaignPath(c)] = campaignPage(c, similar, updated);
+  }
+
+  return { pages, categories, stores, campaigns, updated };
 }
 
 function emptyStorePage(slug, name, updated) {
@@ -346,6 +390,109 @@ function emptyStorePage(slug, name, updated) {
 ` +
     appBanner() +
     `      <p><a href="/endirimler/">Bu günün bütün endirimlərinə bax →</a></p>\n` +
+    foot(updated)
+  );
+}
+
+
+// ---------- campaign pages ----------
+
+function cleanDescription(text, title) {
+  const t = String(text ?? "").replace(/#\S+/g, "").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  if (!t || t === title) return "";
+  return t.length > 700 ? `${t.slice(0, 700).replace(/\s+\S*$/, "")}…` : t;
+}
+
+export function campaignPage(c, similar, updated) {
+  const path = campaignPath(c);
+  const store = c.stores;
+  const cat = c.categories;
+  const b = badge(c);
+  const img = isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`;
+  const realEnd = c.end_date && !c.end_date_estimated;
+  const prices = pricePair(c.discount_label) ?? pricePair(c.description);
+  const desc = cleanDescription(c.description, c.title);
+  const crumbs = breadcrumbs([
+    { name: "Dropy", path: "/" },
+    { name: "Endirimlər", path: "/endirimler/" },
+    { name: cat.name_az ?? cat.slug, path: `/endirimler/${cat.slug}/` },
+    { name: c.title.length > 50 ? `${c.title.slice(0, 50)}…` : c.title, path },
+  ]);
+  const productLd = prices
+    ? jsonLd({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: c.title,
+        image: img,
+        brand: { "@type": "Brand", name: store.name },
+        offers: {
+          "@type": "Offer",
+          price: prices.newPrice.toFixed(2),
+          priceCurrency: "AZN",
+          availability: "https://schema.org/InStock",
+          url: isHttpUrl(c.source_url) ? c.source_url : `${SITE}${path}`,
+          seller: { "@type": "Organization", name: store.name },
+          ...(realEnd ? { priceValidUntil: c.end_date.slice(0, 10) } : {}),
+        },
+      })
+    : "";
+  const priceLine = prices
+    ? `<p class="price"><s>${prices.oldPrice} ₼</s> <b>${prices.newPrice} ₼</b></p>`
+    : "";
+  return (
+    head({
+      title: `${c.title} — ${b} endirim | ${store.name} | Dropy`,
+      description: `${store.name}: ${c.title}${prices ? ` — ${prices.oldPrice} ₼ əvəzinə ${prices.newPrice} ₼` : ` — ${b}`}.${realEnd ? ` Son tarix: ${azDate(c.end_date)}.` : ""} Endirimə mağazanın öz saytında bax.`,
+      path,
+      image: img,
+      extra: `    ${crumbs.ld}
+${productLd ? `    ${productLd}
+` : ""}`,
+    }) +
+    crumbs.html +
+    `      <article class="deal">
+        <div class="deal-img"><img src="${esc(img)}" alt="${esc(c.title)}" referrerpolicy="no-referrer" /><span class="badge">${esc(b)}</span></div>
+        <div class="deal-body">
+          <a class="store" href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}</a>
+          <h1>${esc(c.title)}</h1>
+          ${priceLine}
+          <p class="meta">${realEnd ? `Son tarix: <b>${esc(azDate(c.end_date))}</b> · ` : ""}Kateqoriya: <a href="/endirimler/${esc(cat.slug)}/">${esc(cat.name_az ?? cat.slug)}</a></p>
+          ${isHttpUrl(c.source_url) ? `<a class="btn" href="${esc(c.source_url)}" rel="nofollow noopener" target="_blank">${esc(store.name)} saytında bax →</a>` : ""}
+          ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
+        </div>
+      </article>
+` +
+    appBanner() +
+    (similar.length ? `      <h2>Oxşar endirimlər</h2>
+${grid(similar)}` : "") +
+    `      <p><a href="/endirimler/${esc(cat.slug)}/">Bütün ${esc((cat.name_az ?? cat.slug).toLocaleLowerCase("az"))} endirimləri →</a></p>
+` +
+    foot(updated)
+  );
+}
+
+export function endedCampaignPage(entry, similar, updated) {
+  const crumbs = breadcrumbs([
+    { name: "Dropy", path: "/" },
+    { name: "Endirimlər", path: "/endirimler/" },
+    { name: entry.title.length > 50 ? `${entry.title.slice(0, 50)}…` : entry.title, path: entry.path },
+  ]);
+  return (
+    head({
+      title: `${entry.title} — endirim bitib | ${entry.storeName} | Dropy`,
+      description: `${entry.storeName}-in bu endirimi artıq bitib. ${entry.catName ?? ""} üzrə aktiv endirimlərə Dropy-də bax.`,
+      path: entry.path,
+      extra: `    <meta name="robots" content="noindex, follow" />
+    ${crumbs.ld}
+`,
+    }) +
+    crumbs.html +
+    `      <h1>${esc(entry.title)}</h1>
+      <p class="lead">Bu endirim artıq bitib. <a href="/magaza/${esc(urlSlug(entry.storeSlug))}/">${esc(entry.storeName)}-in digər endirimlərinə</a> və aşağıdakı oxşar təkliflərə bax.</p>
+` +
+    appBanner() +
+    (similar.length ? `      <h2>Oxşar aktiv endirimlər</h2>
+${grid(similar)}` : "") +
     foot(updated)
   );
 }
@@ -393,12 +540,13 @@ async function main() {
   const rows = await res.json();
   if (!Array.isArray(rows) || rows.length < 50) throw new Error(`feed looks wrong (${Array.isArray(rows) ? rows.length : typeof rows} rows) — refusing to overwrite the site`);
 
-  const { pages, categories, stores, updated } = buildSite(rows);
+  const { pages, categories, stores, campaigns, updated } = buildSite(rows);
 
   // Regenerated wholesale, so a category that disappears doesn't linger.
   rmSync(join(ROOT, "endirimler"), { recursive: true, force: true });
   rmSync(join(ROOT, "magazalar"), { recursive: true, force: true });
   rmSync(join(ROOT, "magaza"), { recursive: true, force: true });
+  rmSync(join(ROOT, "kampaniya"), { recursive: true, force: true });
   for (const [path, html] of Object.entries(pages)) write(path, html);
 
   // Stores keep their URL forever (see header comment).
@@ -411,8 +559,37 @@ async function main() {
   }
   writeFileSync(registryFile, JSON.stringify(Object.fromEntries(Object.entries(registry).sort()), null, 2) + "\n");
 
+  // Ended campaigns keep their page for ENDED_KEEP_DAYS ("bitib" + live
+  // alternatives, noindex) so a visitor from Google doesn't hit a 404 the
+  // day after a deal ends; then the page is dropped.
+  const campaignFile = join(ROOT, "seo", "campaigns.json");
+  const seen = existsSync(campaignFile) ? JSON.parse(readFileSync(campaignFile, "utf8")) : {};
+  const nowMs = Date.parse(updated);
+  for (const c of campaigns) {
+    seen[c.id] = {
+      path: campaignPath(c),
+      title: c.title,
+      storeSlug: c.stores.slug,
+      storeName: c.stores.name,
+      catSlug: c.categories.slug,
+      catName: c.categories.name_az,
+      lastSeen: updated,
+    };
+  }
+  const activeIds = new Set(campaigns.map((c) => c.id));
+  for (const [id, entry] of Object.entries(seen)) {
+    if (activeIds.has(id)) continue;
+    if (nowMs - Date.parse(entry.lastSeen) > ENDED_KEEP_DAYS * 24 * 3600_000) {
+      delete seen[id];
+      continue;
+    }
+    const similar = spreadByStore(campaigns.filter((o) => o.categories.slug === entry.catSlug)).slice(0, 8);
+    write(entry.path, endedCampaignPage(entry, similar, updated));
+  }
+  writeFileSync(campaignFile, JSON.stringify(seen, null, 1) + "\n");
+
   const day = updated.slice(0, 10);
-  const urls = ["/", "/destek/", "/endirimler/", "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`)];
+  const urls = ["/", "/destek/", "/endirimler/", "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.map((c) => campaignPath(c))];
   writeFileSync(
     join(ROOT, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

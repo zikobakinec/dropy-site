@@ -20,12 +20,13 @@ Hosted on GitHub Pages (custom domain in `CNAME`).
 - `/endirimler/`: all of today's deals
 - `/endirimler/<kateqoriya>/`: one page per category
 - `/magazalar/` and `/magaza/<slug>/`: the store index and one page per store
+- `/kampaniya/<ad>-<id>/`: one page per campaign, with Product data when a price pair is known
 - `sitemap.xml` and `robots.txt`
 - a marked `<!-- seo:start -->` block of links and structured data in `index.html`
 
-Every card links to the store's own page, and every page has the Google Play button.
+Cards link to the campaign page, and that page links out to the store. Every page has the Google Play button.
 
-A store keeps its URL after its discounts end (`seo/stores.json`), showing an empty state rather than a 404.
+A store keeps its URL after its discounts end (`seo/stores.json`), showing an empty state rather than a 404. An ended campaign keeps its page for 30 days (`seo/campaigns.json`), marked noindex and showing live alternatives, before it is dropped.
 
 `.github/workflows/seo.yml` reruns the generator at 11:30 and 22:30 Baku, each time after ingestion, and commits any change. Run locally: `node seo/generate.mjs`. Tests: `node --test seo/generate.test.mjs`.
 

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -48,9 +48,48 @@ test("landing block is inserted once before the footer and replaced on later run
 
 test("builds hub, category, store and store-index pages with real links", () => {
   const { pages } = buildSite([row(1, "era", 40), row(2, "bravo", 20, "market")], new Date("2026-10-16T08:00:00Z"));
-  assert.deepEqual(Object.keys(pages).sort(), ["/endirimler/", "/endirimler/elektronika/", "/endirimler/market/", "/magaza/bravo/", "/magaza/era/", "/magazalar/"]);
+  assert.deepEqual(Object.keys(pages).sort(), [
+    "/endirimler/", "/endirimler/elektronika/", "/endirimler/market/",
+    "/kampaniya/mehsul-1-1/", "/kampaniya/mehsul-2-2/",
+    "/magaza/bravo/", "/magaza/era/", "/magazalar/",
+  ]);
   assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri<\/h1>/);
-  assert.match(pages["/magaza/era/"], /href="https:\/\/shop\.az\/1" rel="nofollow noopener"/);
+  // Cards lead to our own campaign page; only that page links out to the store.
+  assert.match(pages["/magaza/era/"], /href="\/kampaniya\/mehsul-1-1\/"/);
+  assert.match(pages["/kampaniya/mehsul-1-1/"], /href="https:\/\/shop\.az\/1" rel="nofollow noopener"/);
   assert.match(pages["/endirimler/"], /<link rel="canonical" href="https:\/\/dropy\.az\/endirimler\/" \/>/);
   assert.doesNotMatch(Object.values(pages).join(""), /Bak[ıi]/);
+});
+
+test("campaign slugs are readable Latin and stable per id", () => {
+  assert.equal(slugify("Qadın köynəyi İPƏK — Şəhər ÇAĞ!"), "qadin-koyneyi-ipek-seher-cag");
+  assert.equal(campaignPath({ id: "07f873cf-e1e6", title: "Apple Watch Ultra 2" }), "/kampaniya/apple-watch-ultra-2-07f873cf/");
+  assert.equal(campaignPath({ id: "abcdef12-9", title: "!!!" }), "/kampaniya/abcdef12/");
+});
+
+test("reads every price format the stores use", () => {
+  assert.deepEqual(pricePair("1.688,00 ₼ → 1.343,00 ₼"), { oldPrice: 1688, newPrice: 1343 });
+  assert.deepEqual(pricePair("1229.00 ₼ → 825.00 ₼"), { oldPrice: 1229, newPrice: 825 });
+  assert.deepEqual(pricePair("27,00 ₼ → 9,50 ₼"), { oldPrice: 27, newPrice: 9.5 });
+  assert.equal(pricePair("50%-dək endirim"), undefined);
+});
+
+test("a campaign page carries Product data with the real sale price", () => {
+  const c = { ...row(1, "era", 25), discount_label: "1000 ₼ → 750 ₼" };
+  const { pages } = buildSite([c], new Date("2026-10-16T08:00:00Z"));
+  const html = pages[campaignPath(c)];
+  assert.match(html, /"@type":"Product"/);
+  assert.match(html, /"price":"750.00","priceCurrency":"AZN"/);
+  assert.match(html, /<s>1000 ₼<\/s> <b>750 ₼<\/b>/);
+});
+
+test("an ended campaign page is noindex and points to live alternatives", () => {
+  const html = endedCampaignPage(
+    { path: "/kampaniya/x-1/", title: "Köhnə endirim", storeSlug: "era-seed", storeName: "ERA", catName: "Elektronika" },
+    [row(2, "bravo", 30)],
+    "2026-10-16T08:00:00Z",
+  );
+  assert.match(html, /<meta name="robots" content="noindex, follow" \/>/);
+  assert.match(html, /artıq bitib/);
+  assert.match(html, /href="\/kampaniya\/mehsul-2-2\/"/);
 });

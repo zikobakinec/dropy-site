@@ -59,3 +59,15 @@ h2 { font: 700 1.35rem/1.2 Fraunces, Georgia, serif; margin: 34px 0 14px; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .card h3 { font-size: 0.86rem; }
 }
+.deal { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 24px; margin: 14px 0 6px; align-items: start; }
+.deal-img { position: relative; background: #fff; border: 1px solid var(--border); border-radius: 22px; overflow: hidden; aspect-ratio: 1 / 1; }
+.deal-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.deal-body { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.deal-body h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); }
+.price { margin: 0; font-size: 1.25rem; }
+.price s { color: var(--muted-fg); margin-right: 8px; }
+.price b { color: var(--primary); font-size: 1.6rem; }
+.meta { margin: 0; color: var(--muted-fg); font-size: 0.9rem; }
+.meta a { color: var(--fg); }
+.desc { white-space: pre-line; color: var(--fg); font-size: 0.92rem; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; max-width: 46rem; }
+@media (max-width: 720px) { .deal { grid-template-columns: 1fr; } }
