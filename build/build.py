@@ -81,13 +81,12 @@ for src, dest, meta in PAGES:
             f.write(r.read())
         html = html.replace(url, f"/assets/{name}")
 
-    # Neither store listing is live yet: Google Play gets the same
-    # non-link "Tezliklə" treatment the design already gives App Store.
+    # App Store keeps the design's "Tezliklə" pill until the listing is live.
+    # Google Play is live (versionCode 5, 2026-10): the badge is a real link now.
     html, n = GOOGLE_PLAY_BADGE.subn(
-        lambda m: '<div class="h-12 px-4 rounded-xl bg-card border border-border text-foreground '
-        'flex items-center gap-3 shadow-2xs opacity-85 relative">'
-        + m.group(1).replace(">Mövcuddur<", ">Yükləmə<")
-        + SOON_PILL + "</div>",
+        lambda m: '<a href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru" rel="noopener" class="h-12 px-4 rounded-xl bg-card border '
+        'border-border hover:border-primary/50 text-foreground flex items-center gap-3 transition-colors shadow-2xs">'
+        + m.group(1) + "</a>",
         html,
     )
     if dest == "index.html":

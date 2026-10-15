@@ -1,0 +1,36 @@
+name: Refresh discount pages
+
+# Rebuilds /endirimler/, /magaza/*, /magazalar/ and sitemap.xml from the live
+# feed (seo/generate.mjs). Runs after each ingestion: the GitHub cron at 10:00
+# Baku and the laptop task at 22:00 Baku.
+on:
+  schedule:
+    - cron: "30 7 * * *"   # 11:30 Baku
+    - cron: "30 18 * * *"  # 22:30 Baku
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test seo/generate.test.mjs
+      - run: node seo/generate.mjs
+      - name: Commit if anything changed
+        run: |
+          git config user.name "dropy-bot"
+          git config user.email "support@dropy.az"
+          git add -A
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Refresh discount pages ($(date -u +%Y-%m-%d))"
+          git push
