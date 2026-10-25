@@ -26,8 +26,13 @@ describe("targetAt", () => {
     expect(targetAt(s, 4, 12, 5, false)).toEqual(targetAt(s, 4, 12, 1, false));
   });
   it("centres formations on narrow screens", () => {
-    expect(formation(1, 0, 12, true)[0]).toBe(0);
-    expect(formation(1, 0, 12, false)[0]).toBeGreaterThan(2);
+    const meanX = (narrow: boolean) => {
+      let sum = 0;
+      for (let i = 0; i < 12; i++) sum += formation(1, i, 12, narrow)[0];
+      return sum / 12;
+    };
+    expect(meanX(true)).toBeCloseTo(0, 5);
+    expect(meanX(false)).toBeGreaterThan(2);
   });
   it("always returns finite numbers", () => {
     for (let p = -0.5; p <= 1.5; p += 0.05) targetAt(s, 4, 12, p, true).forEach((v) => expect(Number.isFinite(v)).toBe(true));

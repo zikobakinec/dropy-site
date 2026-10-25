@@ -37,7 +37,7 @@ export function formation(step: number, i: number, count: number, narrow: boolea
   const z = narrow ? -3 : -1;
   const a = (i / count) * Math.PI * 2;
   if (step <= 0) return [cx + Math.cos(a) * 1.3, Math.sin(a) * 1.3, z];
-  if (step === 1) return [cx + (i % 2 ? 0.5 : 0), (i - count / 2) * 0.42, z - (i % 3) * 0.4];
+  if (step === 1) return [cx + (i % 2 ? 0.5 : -0.5), (i - count / 2) * 0.42, z - (i % 3) * 0.4];
   return [cx + Math.cos(a) * 0.35, Math.sin(a) * 0.35, z + 0.5];
 }
 
