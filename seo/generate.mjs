@@ -25,6 +25,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = "https://dropy.az";
 const PLAY_URL = "https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru";
+// The app is Azerbaijan-only on the App Store: without /az/ the link shows "not found" elsewhere.
+const APP_STORE_URL = "https://apps.apple.com/az/app/id6819821532";
 const FEED_SELECT =
   "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
@@ -157,7 +159,7 @@ ${extra}  </head>
         <nav class="nav">
           <a href="/endirimler/">Endirimlər</a>
           <a href="/magazalar/">Mağazalar</a>
-          <a class="btn btn-sm" href="${PLAY_URL}" rel="noopener">Tətbiqi yüklə</a>
+          <a class="btn btn-sm" href="/yukle/">Tətbiqi yüklə</a>
         </nav>
       </div>
     </header>
@@ -173,7 +175,7 @@ function appBanner() {
         </div>
         <div class="stores">
           <a class="btn" href="${PLAY_URL}" rel="noopener">Google Play-dən yüklə</a>
-          <span class="soon">App Store — tezliklə</span>
+          <a class="btn" href="${APP_STORE_URL}" rel="noopener">App Store-dan yüklə</a>
         </div>
       </section>
 `;
