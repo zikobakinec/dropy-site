@@ -51,8 +51,14 @@ function Floater({ slot, i, count, progress }: { slot: Slot; i: number; count: n
     g.position.x += (x + pointer.x * 0.3 - g.position.x) * k;
     g.position.y += (y + Math.sin(t * 0.8 + slot.phase) * 0.15 + pointer.y * 0.2 - g.position.y) * k;
     g.position.z += (z - g.position.z) * k;
-    g.rotation.x = slot.spin[0] + t * 0.15 + pointer.y * 0.4;
-    g.rotation.y = slot.spin[1] + t * 0.2 + pointer.x * 0.5;
+    if (slot.kind === "tag") {
+      g.rotation.x = Math.sin(t * 0.6 + slot.phase) * 0.25 + pointer.y * 0.3;
+      g.rotation.y = Math.sin(t * 0.5 + slot.phase) * 0.45 + pointer.x * 0.4;
+      g.rotation.z = Math.sin(t * 0.4 + slot.phase) * 0.15;
+    } else {
+      g.rotation.x = slot.spin[0] + t * 0.15 + pointer.y * 0.4;
+      g.rotation.y = slot.spin[1] + t * 0.2 + pointer.x * 0.5;
+    }
   });
   return (
     <group ref={ref} position={heroOf(slot, false)} scale={slot.scale}>
