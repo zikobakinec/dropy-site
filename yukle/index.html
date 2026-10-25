@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://dropy.az/" />
+    <link rel="icon" href="/assets/icon.png" />
+    <title>Dropy tətbiqini yüklə</title>
+    <script>
+      // One install link for ads, bio and posts (2026-10-25): Android goes to
+      // Google Play, iPhone/iPad to the App Store; anything else sees both
+      // buttons. The page's own query (utm_*) is passed on to Play, whose
+      // acquisition report reads it.
+      (function () {
+        var PLAY = "https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru";
+        var APP_STORE = "https://apps.apple.com/app/id6819821532";
+        var query = location.search.replace(/^\?/, "");
+        var play = query ? PLAY + "&" + query : PLAY;
+        var ua = navigator.userAgent || "";
+        // iPadOS reports itself as a Mac; touch support tells them apart.
+        var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        window.__dropyLinks = { play: play, appStore: APP_STORE };
+        if (/Android/i.test(ua)) location.replace(play);
+        else if (ios) location.replace(APP_STORE);
+      })();
+    </script>
+    <style>
+      :root { --bg: #fff8f3; --fg: #1d1b1a; --muted: #6b6560; --accent: #f05a28; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #151312; --fg: #f5f1ee; --muted: #a39d98; } }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        background: var(--bg); color: var(--fg); padding: 24px 16px; text-align: center;
+        font-family: Manrope, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      main { max-width: 360px; width: 100%; }
+      img { width: 72px; height: 72px; border-radius: 18px; }
+      h1 { font-size: 22px; margin: 16px 0 6px; }
+      p { color: var(--muted); margin: 0 0 24px; font-size: 15px; }
+      a.btn {
+        display: block; padding: 14px 16px; margin-top: 12px; border-radius: 12px;
+        background: var(--fg); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 16px;
+      }
+      a.btn.primary { background: var(--accent); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/assets/icon.png" alt="Dropy" />
+      <h1>Dropy</h1>
+      <p>Tətbiqi yükləmək üçün mağazanı seç</p>
+      <a class="btn primary" id="play" href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru">Google Play</a>
+      <a class="btn" id="appstore" href="https://apps.apple.com/app/id6819821532">App Store</a>
+    </main>
+    <script>
+      document.getElementById("play").href = window.__dropyLinks.play;
+    </script>
+  </body>
+</html>
