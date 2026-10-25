@@ -13,7 +13,7 @@ Phase 2, which is not part of this work: a seller panel at `dropy.az/panel`. Sto
 In scope:
 - `/` (landing) rebuilt.
 - `/destek/` rebuilt in the new design. Its text and URL stay the same, because App Store Connect uses it as the support URL.
-- `seo/generate.mjs` also writes `data/today.json`.
+- `seo/generate.mjs` also renders the deals and stores blocks into the landing page.
 
 Out of scope:
 - The design of the SEO pages (`/endirimler`, `/magaza`, `/kampaniya`, `/magazalar`, `assets/seo.css`).
@@ -48,7 +48,7 @@ Out of scope:
 
 1. Hero: 3D scene, headline, App Store and Google Play buttons with real links.
 2. Necə işləyir: 3 steps, driven by scroll, with the 3D objects regrouping.
-3. Bu günün endirimləri: 6–8 real deal cards from `data/today.json`, with a tilt effect.
+3. Bu günün endirimləri: 8 real deal cards rendered by `seo/generate.mjs`, with a tilt effect.
 4. Mağazalar: an endless marquee of store logos.
 5. Mağaza sahibləri üçün: "Mağazanızı ödənişsiz qeydiyyatdan keçirin…", support@dropy.az and WhatsApp +994 99 815 15 20. Phase 2 adds a "Panelə daxil ol" button here.
 6. Final CTA, then the footer with legal links (legal.dropy.az) and /destek.
@@ -66,22 +66,22 @@ Out of scope:
 - The landing `index.html` keeps the `<!-- seo:start --> … <!-- seo:end -->` block, so `seo/generate.mjs`'s `injectLanding` keeps working after every build.
 - `build/` (the Sleek export pipeline) is removed and the README is updated.
 
-## Data: today's deals
+## Data: today's deals and the store marquee
 
-- `seo/generate.mjs` already reads `api.dropy.az/feed` at 11:30 and 22:30 Baku. It will also write `data/today.json`: the top 8 active deals. For each deal it writes:
-  - title, store name, store slug;
-  - price, old_price, discount_label;
-  - the image URL, and the campaign page path on dropy.az.
-- The landing page fetches `/data/today.json` from the same origin, so there is no CORS and no extra API load.
-- Fallback: the build embeds the latest snapshot into the HTML, so the section never renders empty when the fetch fails or JS is off.
+- `seo/generate.mjs` already reads `api.dropy.az/feed` at 11:30 and 22:30 Baku. It will also render two more marked blocks into the landing `index.html`, the same way it renders the SEO block:
+  - `<!-- deals:start --> … <!-- deals:end -->`: 8 deal cards with an image, spread by store. Each card links to its `/kampaniya/…` page.
+  - `<!-- stores:start --> … <!-- stores:end -->`: the logo marquee of active stores.
+- All three blocks are also cached in `seo/landing.json`. `seo/apply-landing.mjs` re-applies them after every `vite build`, so a rebuild never empties them.
+- The deals are plain HTML in the page, so there is no client fetch, no CORS and no extra API load. They render with JS off and refresh twice a day.
+- This replaces the `data/today.json` and client-fetch idea from the first draft: there is no fetch to fail and no empty state.
 
 ## Performance and accessibility
 
 - Device tiers:
   - High: full scene with shadows.
   - Low (low `hardwareConcurrency` or `deviceMemory`, or a small screen): fewer objects, no shadows, capped DPR.
-  - No WebGL: a static fallback image.
-- `prefers-reduced-motion`: no scroll animation, and a static scene frame.
+  - No WebGL: a static CSS illustration of the same tags and "%" signs.
+- `prefers-reduced-motion`: no 3D and no scroll animation. The same static CSS illustration is shown.
 - Targets (Lighthouse mobile): Performance ≥ 85, Accessibility ≥ 95, SEO ≥ 95. The hero text must be visible in under 3 s on mid-range Android.
 - Pause rendering when the canvas is offscreen or the tab is hidden.
 
@@ -98,7 +98,7 @@ Out of scope:
 
 ## Testing
 
-- `node --test` for the `today.json` writer, alongside the existing `seo/generate.test.mjs`.
+- `node --test` for the deals and stores blocks and for `apply-landing`, in the existing `seo/generate.test.mjs`. `vitest` for the scene layout and device-tier functions.
 - The `web/` build must pass `tsc --noEmit` and `vite build` cleanly.
 - In Chrome, check desktop and mobile widths, reduced-motion, and the no-WebGL fallback, with screenshots.
 - Lighthouse mobile run against the targets above.
