@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -92,4 +92,46 @@ test("an ended campaign page is noindex and points to live alternatives", () => 
   assert.match(html, /<meta name="robots" content="noindex, follow" \/>/);
   assert.match(html, /artıq bitib/);
   assert.match(html, /href="\/kampaniya\/mehsul-2-2\/"/);
+});
+
+test("landingDeals keeps only deals with a real image, spread by store, at most LANDING_DEALS", () => {
+  const rows = [row(1, "era", 50), row(2, "era", 40), row(3, "bravo", 30), { ...row(4, "oba", 20), image_url: null }, { ...row(5, "dead", 20), image_url: "https://ikxdwpudoozttggaoccl.supabase.co/x.webp" }];
+  for (let i = 10; i < 30; i++) rows.push(row(i, `s${i}`, 10));
+  const out = landingDeals(rows);
+  assert.equal(out.length, LANDING_DEALS);
+  assert.ok(out.every((c) => c.image_url.startsWith("https://")));
+  assert.ok(out.every((c) => !c.image_url.includes("ikxdwpudoozttggaoccl")));
+  assert.notEqual(out[0].stores.slug, out[1].stores.slug);
+});
+
+test("dealsBlock links each card to its campaign page and escapes text", () => {
+  const deal = { ...row(7, "era", 30), id: "abcdef12-0000", title: `Ütü <b>"Pro"</b>` };
+  const html = dealsBlock([deal]);
+  assert.ok(html.includes(`href="${campaignPath(deal)}"`));
+  assert.match(html, /Ütü &lt;b&gt;&quot;Pro&quot;&lt;\/b&gt;/);
+  assert.match(html, /class="deal-card"/);
+  assert.match(html, />-30%</);
+});
+
+test("storesBlock shows a logo or the store's initials, and links to the store page", () => {
+  const html = storesBlock([
+    { slug: "era-seed", name: "ERA", items: [{ stores: { logo_url: "https://era.az/l.png" } }] },
+    { slug: "bravo-seed", name: "Bravo Market", items: [{ stores: { logo_url: null } }] },
+  ]);
+  assert.match(html, /href="\/magaza\/era\/"[\s\S]*src="https:\/\/era.az\/l.png"/);
+  assert.match(html, /href="\/magaza\/bravo\/"[\s\S]*>BM</);
+});
+
+test("injectBetween replaces only the content between markers, and is a no-op without them", () => {
+  const html = `a ${DEALS_START}old${DEALS_END} b`;
+  assert.equal(injectBetween(html, DEALS_START, DEALS_END, "new"), `a ${DEALS_START}new${DEALS_END} b`);
+  assert.equal(injectBetween("plain", DEALS_START, DEALS_END, "new"), "plain");
+});
+
+test("applyLanding fills the seo, deals and stores blocks", () => {
+  const html = `<main>${DEALS_START}${DEALS_END}${STORES_START}${STORES_END}</main><!-- seo:start --><!-- seo:end --><footer></footer>`;
+  const out = applyLanding(html, { seo: "<!-- seo:start -->S<!-- seo:end -->", deals: "D", stores: "T" });
+  assert.match(out, /deals:start -->D<!-- deals:end/);
+  assert.match(out, /stores:start -->T<!-- stores:end/);
+  assert.match(out, /seo:start -->S<!-- seo:end/);
 });

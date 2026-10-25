@@ -1,459 +1,265 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="az">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Dropy mağazaların öz saytlarındakı aktual endirim və kampaniyaları bir tətbiqdə toplayır. Pulsuz." />
-    <meta name="msvalidate.01" content="66354C6981813485B44002104AC64846" />
-    <meta name="google-site-verification" content="wCw_REq40FkF7cN2wkxMXclufNYFbNUp9BrQB-nxxAI" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dropy.az — Azərbaycandakı bütün endirimlər bir tətbiqdə</title>
+    <meta name="description" content="Dropy.az mağazaların öz saytlarındakı aktual endirim və kampaniyaları bir tətbiqdə toplayır. Pulsuz." />
     <link rel="canonical" href="https://dropy.az/" />
-    <meta property="og:title" content="Dropy — Azərbaycandakı bütün endirimlər bir tətbiqdə" />
-    <meta property="og:description" content="Dropy mağazaların öz saytlarındakı aktual endirim və kampaniyaları bir tətbiqdə toplayır. Pulsuz." />
-    <meta property="og:url" content="https://dropy.az/" />
-    <meta property="og:type" content="website" />
     <link rel="icon" href="/assets/icon.png" />
-    <title>Dropy — Azərbaycandakı bütün endirimlər bir tətbiqdə</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@100;200;300;400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-      <link rel="stylesheet" href="/assets/site.css" />
+    <meta name="theme-color" content="#fbf7f0" />
+    <meta name="apple-itunes-app" content="app-id=6819821532" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dropy.az — Azərbaycandakı bütün endirimlər bir tətbiqdə" />
+    <meta property="og:description" content="Mağazaların aktual endirim və kampaniyaları bir tətbiqdə." />
+    <meta property="og:url" content="https://dropy.az/" />
+    <meta property="og:image" content="https://dropy.az/assets/icon.png" />
+    <script type="module" crossorigin src="/assets/web/main-2mvSPPzL.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/web/site-CwU8_zKk.js">
+    <link rel="stylesheet" crossorigin href="/assets/web/site-B9DtQ133.css">
   </head>
   <body>
-    <div
-      class="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground flex flex-col"
-    >
-      <header
-        class="sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b border-border shadow-2xs"
-      >
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div
-              class="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black shadow-xs"
-            >
-              <svg width="22" height="22" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M246.66 132.44L201 200.88a16 16 0 0 1-13.28 7.12H32a8 8 0 0 1-6.66-12.44L70.39 128l-45-67.56A8 8 0 0 1 32 48h155.72A16 16 0 0 1 201 55.12l45.63 68.44a8 8 0 0 1 .03 8.88"/></svg>
-            </div>
-            <span class="font-heading font-extrabold text-xl tracking-tight text-foreground"
-              >Dropy</span
-            >
+    <a class="skip" href="#main">Əsas məzmuna keç</a>
+    <div id="scene" aria-hidden="true"></div>
+
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/assets/icon.png" alt="" width="32" height="32" />Dropy.az</a>
+        <nav class="nav" aria-label="Əsas menyu">
+          <a class="hide-sm" href="/endirimler/">Endirimlər</a>
+          <a class="hide-sm" href="/magazalar/">Mağazalar</a>
+          <a href="/destek/">Dəstək</a>
+          <a class="btn btn-primary" href="/yukle/">Yüklə</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="scene-fallback" aria-hidden="true"><i>-30%</i><i>-50%</i><i>-20%</i><b>%</b></div>
+        <div class="wrap">
+          <span class="eyebrow">Pulsuz endirim tətbiqi</span>
+          <h1>Azərbaycandakı bütün <em>endirimlər</em> bir tətbiqdə</h1>
+          <p class="lead">Dropy.az mağazaların öz rəsmi səhifələrindəki və sosial şəbəkələrindəki aktual kampaniyaları toplayır, kateqoriyalara ayırır və bir yerdə təqdim edir. Onlarla səhifəni ayrı-ayrı gəzməyə ehtiyac yoxdur.</p>
+          <div class="stores">
+            <a class="btn btn-dark" href="https://apps.apple.com/az/app/id6819821532" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.65.8-3.33.8-.7 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.18-1.54 2.67-.39 6.62 1.1 8.79.74 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.7.71 2.87.69 1.19-.02 1.94-1.07 2.66-2.14.84-1.23 1.19-2.42 1.2-2.48-.03-.01-2.3-.88-2.3-3.53zM14.2 6.15c.6-.74 1.01-1.75.9-2.77-.87.04-1.94.58-2.56 1.31-.56.65-1.05 1.69-.92 2.69.97.07 1.97-.49 2.58-1.23z"/></svg>
+              <span><small>Yükləyin</small>App Store</span>
+            </a>
+            <a class="btn btn-dark" href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.2a1.5 1.5 0 0 0-.6 1.25v17.1c0 .52.23.98.6 1.25l9.6-9.8-9.6-9.8zm10.65 8.73 2.7-2.76L5.43 1.55l8.82 9.38zm0 2.14-8.82 9.38 11.52-6.62-2.7-2.76zm6.1-2.34-2.47-1.42-2.95 3.02 2.95 3.02 2.47-1.42c.78-.45.78-1.75 0-2.2z"/></svg>
+              <span><small>Yükləyin</small>Google Play</span>
+            </a>
           </div>
-          <nav class="flex items-center gap-3 sm:gap-6">
-            <a
-              href="#biznes"
-              class="hidden sm:inline text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >Biznes üçün</a
-            ><a
-              href="/destek/"
-              class="hidden sm:inline text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >Dəstək</a
-            ><a
-              href="#yukle"
-              class="px-3.5 sm:px-4 py-2 rounded-xl bg-primary text-primary-foreground font-heading font-bold text-xs sm:text-sm shadow-xs hover:opacity-90 transition-opacity flex items-center gap-1.5"
-              ><svg width="15" height="15" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M228 144v64a12 12 0 0 1-12 12H40a12 12 0 0 1-12-12v-64a12 12 0 0 1 24 0v52h152v-52a12 12 0 0 1 24 0m-108.49 8.49a12 12 0 0 0 17 0l40-40a12 12 0 0 0-17-17L140 115V32a12 12 0 0 0-24 0v83L96.49 95.51a12 12 0 0 0-17 17Z"/></svg><span>Tətbiqi yüklə</span></a
-            >
-          </nav>
+          <p class="note">Qeydiyyatsız baxış · tam pulsuz</p>
         </div>
-      </header>
-      <main class="flex-1">
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-12 sm:pb-20">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center">
-            <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
-              <div
-                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold"
-              >
-                <svg width="14" height="14" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M208 144a15.78 15.78 0 0 1-10.42 14.94L146 178l-19 51.62a15.92 15.92 0 0 1-29.88 0L78 178l-51.62-19a15.92 15.92 0 0 1 0-29.88L78 110l19-51.62a15.92 15.92 0 0 1 29.88 0L146 110l51.62 19A15.78 15.78 0 0 1 208 144m-56-96h16v16a8 8 0 0 0 16 0V48h16a8 8 0 0 0 0-16h-16V16a8 8 0 0 0-16 0v16h-16a8 8 0 0 0 0 16m88 32h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16"/></svg><span>Pulsuz endirim aqreqatoru</span>
-              </div>
-              <h1
-                class="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-foreground leading-[1.15]"
-              >
-                Azərbaycandakı bütün <span class="text-primary">endirimlər</span> bir tətbiqdə
-              </h1>
-              <p
-                class="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0"
-              >
-                Dropy mağazaların öz rəsmi səhifələrindəki və sosial şəbəkələrindəki aktual
-                kampaniyaları toplayır, kateqoriyalara ayırır və bir yerdə təqdim edir. Onlarla
-                səhifəni ayrı-ayrı gəzməyə ehtiyac yoxdur.
-              </p>
-              <div
-                id="yukle"
-                class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-3"
-              >
-                <a href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru" rel="noopener" class="h-12 px-4 rounded-xl bg-card border border-border hover:border-primary/50 text-foreground flex items-center gap-3 transition-colors shadow-2xs"><svg width="24" height="24" class="text-primary shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.25-.84-.76-.84-1.35m13.81-5.38L6.05 21.34l8.49-8.49zm3.35-4.31c.34.27.59.69.59 1.19s-.22.9-.57 1.18l-2.29 1.32l-2.5-2.5l2.5-2.5zM6.05 2.66l10.76 6.22l-2.27 2.27z"/></svg>
-                  <div class="text-left leading-tight">
-                    <span
-                      class="text-[9px] uppercase tracking-wider text-muted-foreground block font-bold"
-                      >Mövcuddur</span
-                    ><span class="text-xs sm:text-sm font-heading font-bold text-foreground"
-                      >Google Play</span
-                    >
-                  </div></a>
-                <div
-                  class="h-12 px-4 rounded-xl bg-card border border-border text-foreground flex items-center gap-3 shadow-2xs opacity-85 relative"
-                >
-                  <svg width="26" height="26" class="text-foreground shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47c-1.34.03-1.77-.79-3.29-.79c-1.53 0-2 .77-3.27.82c-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51c1.28-.02 2.5.87 3.29.87c.78 0 2.26-1.07 3.81-.91c.65.03 2.47.26 3.64 1.98c-.09.06-2.17 1.28-2.15 3.81c.03 3.02 2.65 4.03 2.68 4.04c-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5c.13 1.17-.34 2.35-1.04 3.19c-.69.85-1.83 1.51-2.95 1.42c-.15-1.15.41-2.35 1.05-3.11"/></svg>
-                  <div class="text-left leading-tight">
-                    <span
-                      class="text-[9px] uppercase tracking-wider text-muted-foreground block font-bold"
-                      >Yükləmə</span
-                    ><span class="text-xs sm:text-sm font-heading font-bold text-foreground"
-                      >App Store</span
-                    >
-                  </div>
-                  <span
-                    class="ml-1 text-[9px] font-black uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20"
-                    >Tezliklə</span
-                  >
-                </div>
-              </div>
-              <p
-                class="text-xs text-muted-foreground flex items-center justify-center lg:justify-start gap-2 pt-1"
-              >
-                <svg width="16" height="16" class="text-emerald-500 shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M208 36H48a20 20 0 0 0-20 20v56c0 54.29 26.32 87.22 48.4 105.29c23.71 19.39 47.44 26 48.44 26.29a12.1 12.1 0 0 0 6.32 0c1-.28 24.73-6.9 48.44-26.29c22.08-18.07 48.4-51 48.4-105.29V56a20 20 0 0 0-20-20m-4 76c0 35.71-13.09 64.69-38.91 86.15A126.3 126.3 0 0 1 128 219.38a126.1 126.1 0 0 1-37.09-21.23C65.09 176.69 52 147.71 52 112V60h152ZM79.51 144.49a12 12 0 1 1 17-17L112 143l47.51-47.52a12 12 0 0 1 17 17l-56 56a12 12 0 0 1-17 0Z"/></svg><span>Qeydiyyatsız baxış · 100% pulsuz istifadə</span>
-              </p>
+      </section>
+
+      <section id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <h2 class="h2 reveal" id="how-title">Necə işləyir?</h2>
+          <div class="steps">
+            <div class="step reveal" data-step="0">
+              <span class="num">1</span>
+              <h3>Kateqoriyanı seç</h3>
+              <p>Supermarket, geyim, elektronika, restoran və ya gözəllik — axtardığın sahəni bir toxunuşla filtrlə.</p>
             </div>
-            <div class="lg:col-span-5 flex justify-center">
-              <div
-                class="w-full max-w-[310px] sm:max-w-[330px] rounded-[2.5rem] bg-card border-4 border-foreground/10 p-3 shadow-2xl relative"
-              >
-                <div class="w-24 h-4 bg-foreground/10 rounded-full mx-auto mb-2"></div>
-                <div
-                  class="rounded-[2rem] bg-background border border-border p-3 space-y-3 overflow-hidden text-left"
-                >
-                  <div
-                    class="h-9 px-3 rounded-xl bg-muted/60 border border-border flex items-center justify-between text-xs text-muted-foreground"
-                  >
-                    <div class="flex items-center gap-2">
-                      <svg width="14" height="14" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M232.49 215.51L185 168a92.12 92.12 0 1 0-17 17l47.53 47.54a12 12 0 0 0 17-17ZM44 112a68 68 0 1 1 68 68a68.07 68.07 0 0 1-68-68"/></svg><span class="text-[11px]">Bravo, Baku Electronics...</span>
-                    </div>
-                    <svg width="13" height="13" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M40 92h30.06a36 36 0 0 0 67.88 0H216a12 12 0 0 0 0-24h-78.06a36 36 0 0 0-67.88 0H40a12 12 0 0 0 0 24m64-24a12 12 0 1 1-12 12a12 12 0 0 1 12-12m112 96h-14.06a36 36 0 0 0-67.88 0H40a12 12 0 0 0 0 24h94.06a36 36 0 0 0 67.88 0H216a12 12 0 0 0 0-24m-48 24a12 12 0 1 1 12-12a12 12 0 0 1-12 12"/></svg>
-                  </div>
-                  <div class="flex gap-1.5 overflow-hidden text-[10.5px]">
-                    <span
-                      class="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground font-bold shrink-0"
-                      >Hamısı</span
-                    ><span
-                      class="px-2.5 py-1 rounded-lg bg-card border border-border font-semibold text-muted-foreground shrink-0"
-                      >Market</span
-                    ><span
-                      class="px-2.5 py-1 rounded-lg bg-card border border-border font-semibold text-muted-foreground shrink-0"
-                      >Elektronika</span
-                    ><span
-                      class="px-2.5 py-1 rounded-lg bg-card border border-border font-semibold text-muted-foreground shrink-0"
-                      >Geyim</span
-                    >
-                  </div>
-                  <div class="rounded-xl border border-border bg-card p-2.5 space-y-2">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-1.5">
-                        <span
-                          class="size-6 rounded-md bg-emerald-500/15 text-emerald-600 font-black text-[10px] flex items-center justify-center"
-                          >B</span
-                        >
-                        <div>
-                          <span class="font-bold text-xs block leading-none">Bravo</span
-                          ><span class="text-[9px] text-muted-foreground">Market</span>
-                        </div>
-                      </div>
-                      <span
-                        class="text-[9px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded"
-                        >30 sentyabradək</span
-                      >
-                    </div>
-                    <div
-                      class="h-24 rounded-lg bg-muted relative overflow-hidden flex items-center justify-center"
-                    >
-                      <img
-                        alt="Bravo-da Brend Festival"
-                        src="/assets/bravo-brend-festival.png"
-                        class="w-full h-full object-cover"
-                      /><span
-                        class="absolute top-1.5 right-1.5 bg-primary text-primary-foreground font-black text-xs px-2 py-0.5 rounded-md shadow-xs"
-                        >Yeni endirim</span
-                      >
-                    </div>
-                    <p class="text-[11px] font-bold text-foreground truncate">
-                      Bravo-da Brend Festival!
-                    </p>
-                  </div>
-                  <div class="rounded-xl border border-border bg-card p-2 flex items-center gap-2">
-                    <div
-                      class="size-11 rounded-lg bg-blue-500/10 text-blue-600 font-black text-xs flex items-center justify-center shrink-0 border border-blue-500/20"
-                    >
-                      BE
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-1.5">
-                        <p class="text-[10.5px] font-bold text-foreground truncate">
-                          Baku Electronics
-                        </p>
-                        <span class="text-[8.5px] text-muted-foreground">Elektronika</span>
-                      </div>
-                      <p class="text-[9px] text-muted-foreground truncate">
-                        Seçilmiş smartfon və məişət texnikası
-                      </p>
-                    </div>
-                    <span class="text-xs font-black text-primary shrink-0">-20%</span>
-                  </div>
-                </div>
-              </div>
+            <div class="step reveal" data-step="1">
+              <span class="num">2</span>
+              <h3>Endirimlərə bax</h3>
+              <p>Endirim faizlərini və bitmə tarixlərini müqayisə et, ən sərfəli təklifi tap.</p>
+            </div>
+            <div class="step reveal" data-step="2">
+              <span class="num">3</span>
+              <h3>Mağazaya keç və ya saxla</h3>
+              <p>Təklifi sevimliyə əlavə et və ya "Mağazaya get" düyməsi ilə birbaşa satıcının rəsmi ünvanına yönəl.</p>
             </div>
           </div>
-        </section>
-        <section class="border-y border-border bg-muted/20 py-12 sm:py-16">
-          <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
-            <div class="text-center space-y-2 max-w-xl mx-auto">
-              <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
-                Necə işləyir?
-              </h2>
-              <p class="text-xs sm:text-sm text-muted-foreground">
-                Endirimləri tapmaq və istifadə etmək üçün 3 sadə addım
-              </p>
+        </div>
+      </section>
+
+      <section id="deals" aria-labelledby="deals-title">
+        <div class="wrap">
+          <div class="panel reveal">
+            <div class="head-row">
+              <div>
+                <h2 class="h2" id="deals-title">Bu günün endirimləri</h2>
+                <p class="lead">Tətbiqdəki real endirimlərdən seçmələr. Hər gün yenilənir.</p>
+              </div>
+              <a class="more" href="/endirimler/">Hamısına bax →</a>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <div class="bg-card rounded-2xl border border-border p-5 space-y-3 shadow-2xs">
-                <div
-                  class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-heading font-black text-base"
-                >
-                  1
-                </div>
-                <h3 class="font-heading font-bold text-base text-foreground">Kateqoriyanı seç</h3>
-                <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Supermarket, geyim, elektronika, restoran və ya gözəllik — axtardığın sahəni bir
-                  toxunuşla filtrlə.
-                </p>
-              </div>
-              <div class="bg-card rounded-2xl border border-border p-5 space-y-3 shadow-2xs">
-                <div
-                  class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-heading font-black text-base"
-                >
-                  2
-                </div>
-                <h3 class="font-heading font-bold text-base text-foreground">Endirimlərə bax</h3>
-                <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Endirim faizlərini, bitmə tarixlərini və keçərli filialları müqayisə et, ən
-                  sərfəli təklifi tap.
-                </p>
-              </div>
-              <div class="bg-card rounded-2xl border border-border p-5 space-y-3 shadow-2xs">
-                <div
-                  class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-heading font-black text-base"
-                >
-                  3
-                </div>
-                <h3 class="font-heading font-bold text-base text-foreground">
-                  Mağazaya keç və ya saxla
-                </h3>
-                <p class="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Təklifi sevimliyə əlavə et və ya "Mağazaya get" düyməsi ilə birbaşa satıcının
-                  rəsmi ünvanına yönəl.
-                </p>
-              </div>
+            <div class="deals-grid"><!-- deals:start -->
+          <a class="deal-card" href="/kampaniya/alterra-24h-fresh-makiyaj-tinti-03-52743421/">
+            <span class="deal-img"><img src="https://api.rossmann.az/uploads/images/4305615333274_1.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-77%</span></span>
+            <span class="deal-store">Rossmann</span>
+            <span class="deal-title">Alterra 24h fresh makiyaj tinti, 03</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/crown-6-li-cay-stekani-desti-3706dfa0/">
+            <span class="deal-img"><img src="https://panel.serwant.az/storage/documents/product_image/oofkzFbj3fFertyhE2h8LZUeZ8EyRyENzk8oe2cO.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-76%</span></span>
+            <span class="deal-store">Serwant (Emsan)</span>
+            <span class="deal-title">Crown 6-lı çay stəkanı dəsti</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/kristal-tuk-temizleyici-fiziki-epilyasiya-aleti-nano-kristal-ede1d271/">
+            <span class="deal-img"><img src="https://www.arizon.az/storage/photos/5/aaaamelek/tuktemizleyen/pp.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-75%</span></span>
+            <span class="deal-store">Arizon</span>
+            <span class="deal-title">Kristal Tük Təmizləyici Fiziki Epilyasiya Aləti Nano Kristal Epilator Kişi Qadın</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/iphone-17-ekran-408f901a/">
+            <span class="deal-img"><img src="https://almal.az/image/cache/catalog/kataloq/telefony/zapchasti-dlya-telefonov/x-228x228.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-75%</span></span>
+            <span class="deal-store">Almal.az</span>
+            <span class="deal-title">iPhone 17 Ekran</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/kukla-barbie-323-36-llq89012-6fb58678/">
+            <span class="deal-img"><img src="https://www.supertoys.az/kukla-barbie-323-36-llq89012-barbie-dolls-25106-19-K.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-73%</span></span>
+            <span class="deal-store">Supertoys</span>
+            <span class="deal-title">Kukla Barbie 323-36 LLQ89012</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/beaphar-flea-tick-orta-cins-itler-ucun-bire-ve-genelere-qars-0b67405c/">
+            <span class="deal-img"><img src="https://zoomagazin.az/wp-content/uploads/2025/12/6023497-1.webp" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-71%</span></span>
+            <span class="deal-store">ZooMagazin.az</span>
+            <span class="deal-title">Beaphar Flea &amp; Tick, orta cins itlər üçün birə və gənələrə qarşı boyunbağı, 65 sm, ağ</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/baku-electronics-deli-dolunun-heftesonu-teklifleri-nagd-alis-142421b1/">
+            <span class="deal-img"><img src="https://media.bakuelectronics.az/media/page/slider/923x520-deli-dolu_copy.webp" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-70%</span></span>
+            <span class="deal-store">Baku Electronics</span>
+            <span class="deal-title">Baku Electronics: Dəli-dolunun həftəsonu təklifləri, nağd alışda 70%-dək endirim</span>
+          </a>
+          <a class="deal-card" href="/kampaniya/baby-hooded-sherpa-jumpsuit-2561965f/">
+            <span class="deal-img"><img src="https://www.yenibebe.az/data/img/202212/1847/small_1o546510.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">-70%</span></span>
+            <span class="deal-store">Yenibebe</span>
+            <span class="deal-title">Baby Hooded Sherpa Jumpsuit</span>
+          </a><!-- deals:end --></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="stores" aria-labelledby="stores-title">
+        <div class="wrap">
+          <div class="head-row reveal">
+            <div>
+              <h2 class="h2" id="stores-title">Mağazalar</h2>
+              <p class="lead">Sevdiyiniz mağazaları izləyin, yeni endirim çıxanda bildiriş alın.</p>
+            </div>
+            <a class="more" href="/magazalar/">Bütün mağazalar →</a>
+          </div>
+        </div>
+        <div class="marquee" role="region" aria-label="Tətbiqdəki mağazalar">
+          <div class="marquee-track"><!-- stores:start -->
+          <a class="store-chip" href="/magaza/adishop/"><img src="https://www.google.com/s2/favicons?domain=adishop.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Adishop.az</span></a>
+          <a class="store-chip" href="/magaza/agoda/"><img src="https://www.google.com/s2/favicons?domain=www.agoda.com&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Agoda</span></a>
+          <a class="store-chip" href="/magaza/almal/"><img src="https://www.google.com/s2/favicons?domain=almal.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Almal.az</span></a>
+          <a class="store-chip" href="/magaza/aloe/"><img src="https://aloe.az/_next/static/media/leaf1.1948e6ca.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Aloe+</span></a>
+          <a class="store-chip" href="/magaza/araz-market/"><img src="https://www.google.com/s2/favicons?domain=www.arazmarket.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Araz Market</span></a>
+          <a class="store-chip" href="/magaza/arizon/"><img src="https://www.google.com/s2/favicons?domain=arizon.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Arizon</span></a>
+          <a class="store-chip" href="/magaza/aromania/"><img src="https://www.google.com/s2/favicons?domain=aromania.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Aromania</span></a>
+          <a class="store-chip" href="/magaza/arzum-beauty/"><img src="https://arzumbeauty.com/storage/app/public/company/og-default.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Arzum Beauty</span></a>
+          <a class="store-chip" href="/magaza/atlet/"><img src="https://www.google.com/s2/favicons?domain=atlet.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Atlet.az</span></a>
+          <a class="store-chip" href="/magaza/aztelekom/"><img src="https://www.google.com/s2/favicons?domain=aztelekom.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Aztelekom</span></a>
+          <a class="store-chip" href="/magaza/bahar-store/"><img src="https://admin475.baharstore.az/storage//uploads/images/logo-1716494136.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Bahar Store</span></a>
+          <a class="store-chip" href="/magaza/bakenroll/"><img src="https://www.bakenroll.az/assets/imgs/favicon-48x48.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Bake&amp;Roll</span></a>
+          <a class="store-chip" href="/magaza/baku-book-center/"><img src="https://www.google.com/s2/favicons?domain=bakubookcenter.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Baku Book Center</span></a>
+          <a class="store-chip" href="/magaza/baku-electronics/"><img src="https://www.google.com/s2/favicons?domain=www.bakuelectronics.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Baku Electronics</span></a>
+          <a class="store-chip" href="/magaza/bazarstore/"><img src="https://bazarstore.az/images/thumbs/0036736_Bazarstore%20logo.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Bazarstore</span></a>
+          <a class="store-chip" href="/magaza/bravo/"><img src="https://www.google.com/s2/favicons?domain=www.bravosupermarket.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Bravo</span></a>
+          <a class="store-chip" href="/magaza/brendhouse/"><img src="https://www.google.com/s2/favicons?domain=brendhouse.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>BrendHouse</span></a>
+          <a class="store-chip" href="/magaza/delonghi/"><img src="https://delonghi.az/local/templates/.default/assets/medias/logo-dl-2x.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>De'Longhi</span></a>
+          <a class="store-chip" href="/magaza/destim/"><img src="https://www.google.com/s2/favicons?domain=destim.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Destim.az</span></a>
+          <a class="store-chip" href="/magaza/era-electronics/"><img src="https://www.google.com/s2/favicons?domain=eraelectronics.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>ERA Electronics</span></a>
+          <a class="store-chip" href="/magaza/eurolux/"><img src="https://www.google.com/s2/favicons?domain=eurolux.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Eurolux</span></a>
+          <a class="store-chip" href="/magaza/evfemiya/"><img src="https://evfemiya.az/image/image/t8lz4d7.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Evfemiya</span></a>
+          <a class="store-chip" href="/magaza/etirsah/"><img src="https://www.google.com/s2/favicons?domain=www.etirsah.com&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Ətirşah Parfüm</span></a>
+          <a class="store-chip" href="/magaza/farell-brooklyn/"><img src="https://www.google.com/s2/favicons?domain=farellbrooklyn.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Farell Brooklyn</span></a>
+          <a class="store-chip" href="/magaza/femisun/"><img src="https://www.femisun.az/logo.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Femisun</span></a>
+          <a class="store-chip" href="/magaza/fitx/"><img src="https://www.google.com/s2/favicons?domain=fitx.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Fitx.az</span></a>
+          <a class="store-chip" href="/magaza/go-sport/"><img src="https://www.google.com/s2/favicons?domain=www.gosport.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Go Sport</span></a>
+          <a class="store-chip" href="/magaza/happy-baby/"><img src="https://www.google.com/s2/favicons?domain=happybabyshop.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Happy Baby</span></a>
+          <a class="store-chip" href="/magaza/iherb/"><img src="https://www.google.com/s2/favicons?domain=www.iherb.com&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>iHerb</span></a>
+          <a class="store-chip" href="/magaza/irshad/"><img src="https://www.google.com/s2/favicons?domain=irshad.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>İrşad Electronics</span></a>
+          <a class="store-chip" href="/magaza/ispace/"><img src="https://www.google.com/s2/favicons?domain=ispace.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>iSpace</span></a>
+          <a class="store-chip" href="/magaza/karcher/"><img src="https://www.google.com/s2/favicons?domain=karchershop.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Kärcher</span></a>
+          <a class="store-chip" href="/magaza/kontakt-home/"><img src="https://www.google.com/s2/favicons?domain=kontakt.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Kontakt Home</span></a>
+          <a class="store-chip" href="/magaza/larose/"><img src="https://www.google.com/s2/favicons?domain=larose.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Larose</span></a>
+          <a class="store-chip" href="/magaza/master-az/"><img src="https://www.google.com/s2/favicons?domain=master.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Master.az</span></a>
+          <a class="store-chip" href="/magaza/megamart/"><img src="https://www.google.com/s2/favicons?domain=megamart.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Megamart</span></a>
+          <a class="store-chip" href="/magaza/mgstore/"><img src="https://www.google.com/s2/favicons?domain=mgstore.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>mgstore.az</span></a>
+          <a class="store-chip" href="/magaza/myfilter-az-mv24szib/"><img src="https://lzsanyxptvziidujidgi.supabase.co/storage/v1/object/public/store-logos/5926ae41-cb89-48f5-b55b-914e9d8d6cdd/logo?t=1791620868808" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Myfilter.az</span></a>
+          <a class="store-chip" href="/magaza/mytrendshop/"><img src="https://www.google.com/s2/favicons?domain=mytrendshop.net&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>MyTrend Shop</span></a>
+          <a class="store-chip" href="/magaza/neptun/"><img src="https://neptun.az/image/catalog/loqo/favicon-neptu-new.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Neptun</span></a>
+          <a class="store-chip" href="/magaza/olivia/"><img src="https://www.google.com/s2/favicons?domain=olivia.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Olivia</span></a>
+          <a class="store-chip" href="/magaza/omid/"><img src="https://www.google.com/s2/favicons?domain=omid.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Omid</span></a>
+          <a class="store-chip" href="/magaza/oyuncaq-net/"><img src="https://www.google.com/s2/favicons?domain=oyuncaq.net&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Oyuncaq.net</span></a>
+          <a class="store-chip" href="/magaza/park-cinema/"><img src="https://www.google.com/s2/favicons?domain=parkcinema.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Park Cinema</span></a>
+          <a class="store-chip" href="/magaza/perla/"><img src="https://www.google.com/s2/favicons?domain=perla.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Perla Mebel</span></a>
+          <a class="store-chip" href="/magaza/pizza-mizza/"><img src="https://pizzamizza.az/upload/main/650/65087f8d11493c930b401f03ff4e0d1b.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Pizza Mizza</span></a>
+          <a class="store-chip" href="/magaza/rahat-market/"><img src="https://www.google.com/s2/favicons?domain=rahatmarket.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Rahat Market</span></a>
+          <a class="store-chip" href="/magaza/richmen/"><img src="https://www.google.com/s2/favicons?domain=richmen.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Richmen</span></a>
+          <a class="store-chip" href="/magaza/rossmann/"><img src="https://www.google.com/s2/favicons?domain=rossmann.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Rossmann</span></a>
+          <a class="store-chip" href="/magaza/royal/"><img src="https://www.google.com/s2/favicons?domain=royal.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Royal</span></a>
+          <a class="store-chip" href="/magaza/saglam-aile/"><img src="https://www.google.com/s2/favicons?domain=saglamaile.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Sağlam Ailə</span></a>
+          <a class="store-chip" href="/magaza/salonbazari/"><img src="https://salonbazari.az/logo-salon.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Salonbazari</span></a>
+          <a class="store-chip" href="/magaza/serwant/"><img src="https://cdn.myikas.com/images/theme-images/0cc6d007-1ebf-4475-862a-52bdd80ef19d/image_180.webp" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Serwant (Emsan)</span></a>
+          <a class="store-chip" href="/magaza/smarton/"><img src="https://www.google.com/s2/favicons?domain=smarton.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Smarton</span></a>
+          <a class="store-chip" href="/magaza/starbucks/"><img src="https://www.google.com/s2/favicons?domain=www.starbucks.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Starbucks</span></a>
+          <a class="store-chip" href="/magaza/supertoys/"><img src="https://www.google.com/s2/favicons?domain=supertoys.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Supertoys</span></a>
+          <a class="store-chip" href="/magaza/sushiroom/"><img src="https://www.google.com/s2/favicons?domain=sushiroom.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Sushi Room</span></a>
+          <a class="store-chip" href="/magaza/tamstore/"><img src="https://www.tamstore.az/uploads/1702016832-6572b740206e4.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Tamstore</span></a>
+          <a class="store-chip" href="/magaza/tex-az/"><img src="https://www.google.com/s2/favicons?domain=tex.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Tex.az</span></a>
+          <a class="store-chip" href="/magaza/vmf/"><img src="https://www.google.com/s2/favicons?domain=vmf.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>VMF</span></a>
+          <a class="store-chip" href="/magaza/yenibebe/"><img src="https://www.google.com/s2/favicons?domain=yenibebe.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Yenibebe</span></a>
+          <a class="store-chip" href="/magaza/yves-rocher/"><img src="https://www.google.com/s2/favicons?domain=yvesrocher.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Yves Rocher</span></a>
+          <a class="store-chip" href="/magaza/zeferan-hospital/"><img src="https://zeferanhospital.az/resources/img/zeferan__logo.png" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Zəfəran Hospital</span></a>
+          <a class="store-chip" href="/magaza/zoomagazin/"><img src="https://www.google.com/s2/favicons?domain=zoomagazin.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>ZooMagazin.az</span></a>
+          <a class="store-chip" href="/magaza/whey/"><img src="https://www.google.com/s2/favicons?domain=whey.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>Whey.az</span></a>
+          <a class="store-chip" href="/magaza/world-telecom/"><img src="https://www.google.com/s2/favicons?domain=www.w-t.az&amp;sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" /><span>World Telecom</span></a><!-- stores:end --></div>
+        </div>
+      </section>
+
+      <section id="biznes" aria-labelledby="sellers-title">
+        <div class="wrap">
+          <div class="panel sellers reveal">
+            <div>
+              <span class="eyebrow">Mağaza sahibləri üçün</span>
+              <h2 class="h2" id="sellers-title">Mağazanızı ödənişsiz qeydiyyatdan keçirin</h2>
+              <p class="lead">Endirimlərinizi paylaşın, daha çox müştəri cəlb edin. Qoşulmaq istəsəniz və ya əlavə suallarınız olarsa, bizimlə əlaqə saxlayın.</p>
+            </div>
+            <div class="contact-list">
+              <a class="btn btn-primary" href="mailto:support@dropy.az">support@dropy.az</a>
+              <a class="btn btn-ghost" href="https://wa.me/994998151520" rel="noopener">WhatsApp: +994 99 815 15 20</a>
             </div>
           </div>
-        </section>
-        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8">
-          <div class="text-center space-y-2 max-w-xl mx-auto">
-            <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
-              Dropy-nin imkanları
-            </h2>
-            <p class="text-xs sm:text-sm text-muted-foreground">
-              Hər gün ən son fürsətlərdən xəbərdar olmaq üçün yaradılıb
-            </p>
+        </div>
+      </section>
+
+      <section class="cta" id="yukle" aria-labelledby="yukle-title">
+        <div class="wrap reveal">
+          <h2 class="h2" id="yukle-title">Endirimləri qaçırmayın</h2>
+          <p class="lead" style="margin: 0 auto">Dropy.az-ı yükləyin, bütün endirimlər cibinizdə olsun.</p>
+          <div class="stores">
+            <a class="btn btn-dark" href="https://apps.apple.com/az/app/id6819821532" rel="noopener"><span><small>Yükləyin</small>App Store</span></a>
+            <a class="btn btn-dark" href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru" rel="noopener"><span><small>Yükləyin</small>Google Play</span></a>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M100 36H56a20 20 0 0 0-20 20v44a20 20 0 0 0 20 20h44a20 20 0 0 0 20-20V56a20 20 0 0 0-20-20m-4 60H60V60h36Zm104-60h-44a20 20 0 0 0-20 20v44a20 20 0 0 0 20 20h44a20 20 0 0 0 20-20V56a20 20 0 0 0-20-20m-4 60h-36V60h36Zm-96 40H56a20 20 0 0 0-20 20v44a20 20 0 0 0 20 20h44a20 20 0 0 0 20-20v-44a20 20 0 0 0-20-20m-4 60H60v-36h36Zm104-60h-44a20 20 0 0 0-20 20v44a20 20 0 0 0 20 20h44a20 20 0 0 0 20-20v-44a20 20 0 0 0-20-20m-4 60h-36v-36h36Z"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Kateqoriyalar üzrə endirimlər
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Marketlərdən geyim brendlərinə, restoranlardan apteklərə qədər bütün sektorlar tək
-                məkanda.
-              </p>
-            </div>
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M232.49 215.51L185 168a92.12 92.12 0 1 0-17 17l47.53 47.54a12 12 0 0 0 17-17ZM44 112a68 68 0 1 1 68 68a68.07 68.07 0 0 1-68-68"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Ağıllı axtarış və filtrlər
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Məhsul adı, mağaza və ya endirim faizinə görə saniyələr içində ən uyğun nəticəni
-                tapın.
-              </p>
-            </div>
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M225.81 74.65A11.86 11.86 0 0 1 220.3 76a12 12 0 0 1-10.67-6.47a90.1 90.1 0 0 0-32-35.38a12 12 0 1 1 12.8-20.29a115.25 115.25 0 0 1 40.54 44.62a12 12 0 0 1-5.16 16.17M46.37 69.53a90.1 90.1 0 0 1 32-35.38A12 12 0 1 0 65.6 13.86a115.25 115.25 0 0 0-40.54 44.62a12 12 0 0 0 5.13 16.17A11.86 11.86 0 0 0 35.7 76a12 12 0 0 0 10.67-6.47m173.51 98.35A20 20 0 0 1 204 200h-32.19a44 44 0 0 1-87.62 0H52a20 20 0 0 1-15.91-32.12c7.17-9.33 15.73-26.62 15.88-55.94A76 76 0 0 1 204 112c.15 29.26 8.71 46.55 15.88 55.88M147.6 200h-39.2a20 20 0 0 0 39.2 0m48.74-24c-8.16-13-16.19-33.57-16.34-63.94A52 52 0 1 0 76 112c-.15 30.42-8.18 51-16.34 64Z"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Sevimli mağazaların bildirişləri
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                İzlədiyiniz mağazalarda yeni kampaniya başlayan kimi dərhal bildiriş alın.
-              </p>
-            </div>
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M204 75.64V40a20 20 0 0 0-20-20H72a20 20 0 0 0-20 20v36a20.1 20.1 0 0 0 8 16l48 36l-48 36a20.1 20.1 0 0 0-8 16v36a20 20 0 0 0 20 20h112a20 20 0 0 0 20-20v-35.64a20.13 20.13 0 0 0-7.94-16L147.9 128l48.16-36.4A20.13 20.13 0 0 0 204 75.64M180 44v28H76V44Zm-52 69l-22.67-17h45.1Zm52 99H76v-30l40-30v16a12 12 0 0 0 24 0v-15.89l40 30.24Z"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Bitmək üzrə olan endirimlər
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Vaxtı məhdud olan son gün təkliflərini qaçırmamaq üçün xüsusi xəbərdarlıqlar.
-              </p>
-            </div>
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M200 220h-39.27c5.18-5 10.75-10.71 16.33-17.13C205.15 170.57 220 136.37 220 104a92 92 0 0 0-184 0c0 50 34.12 91.94 59.18 116H56a12 12 0 0 0 0 24h144a12 12 0 0 0 0-24M60 104a68 68 0 0 1 136 0c0 33.31-20 63.37-36.7 82.71a249.4 249.4 0 0 1-31.3 30.18a249.4 249.4 0 0 1-31.3-30.18C80 167.37 60 137.31 60 104m68 44a44 44 0 1 0-44-44a44.05 44.05 0 0 0 44 44m0-64a20 20 0 1 1-20 20a20 20 0 0 1 20-20"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Yaxınlıqdakı filiallar
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Seçdiyiniz endirimin sizə ən yaxın hansı filial və ticarət mərkəzində olduğunu
-                dərhal görün.
-              </p>
-            </div>
-            <div class="bg-card rounded-2xl border border-border p-4 sm:p-5 space-y-2.5 shadow-2xs">
-              <div
-                class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
-              >
-                <svg width="18" height="18" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M208 36H48a20 20 0 0 0-20 20v56c0 54.29 26.32 87.22 48.4 105.29c23.71 19.39 47.44 26 48.44 26.29a12.1 12.1 0 0 0 6.32 0c1-.28 24.73-6.9 48.44-26.29c22.08-18.07 48.4-51 48.4-105.29V56a20 20 0 0 0-20-20m-4 76c0 35.71-13.09 64.69-38.91 86.15A126.3 126.3 0 0 1 128 219.38a126.1 126.1 0 0 1-37.09-21.23C65.09 176.69 52 147.71 52 112V60h152ZM79.51 144.49a12 12 0 1 1 17-17L112 143l47.51-47.52a12 12 0 0 1 17 17l-56 56a12 12 0 0 1-17 0Z"/></svg>
-              </div>
-              <h3 class="font-heading font-bold text-sm sm:text-base text-foreground">
-                Yoxlanılmış məlumatlar
-              </h3>
-              <p class="text-xs text-muted-foreground leading-relaxed">
-                Bütün elanlar moderatorlarımız tərəfindən rəsmi mənbələrlə uyğunlaşdırılır.
-              </p>
-            </div>
-          </div>
-        </section>
-        <section
-          id="biznes"
-          class="border-t border-border bg-gradient-to-b from-card to-muted/30 py-12 sm:py-16"
-        >
-          <div class="max-w-5xl mx-auto px-4 sm:px-6">
-            <div class="bg-card rounded-3xl border border-border p-6 sm:p-10 shadow-sm space-y-6">
-              <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-6"
-              >
-                <div class="space-y-2">
-                  <span
-                    class="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20"
-                    >Biznes və Mağazalar üçün</span
-                  >
-                  <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
-                    Mağazanızı Dropy-da pulsuz təqdim edin
-                  </h2>
-                  <p class="text-xs sm:text-sm text-muted-foreground max-w-xl">
-                    Endirimlərinizi birbaşa alıcılara çatdırın. Heç bir komissiya və ya abunə
-                    haqqı tələb olunmur.
-                  </p>
-                </div>
-                <a href="/#yukle"
-                  class="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-heading font-bold text-xs sm:text-sm shadow-md shadow-primary/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shrink-0"
-                  ><svg width="16" height="16" class="shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M236 96a12 12 0 0 0-.44-3.3L221.2 42.51A20.08 20.08 0 0 0 202 28H54a20.08 20.08 0 0 0-19.2 14.51L20.46 92.7A12 12 0 0 0 20 96v16a43.94 43.94 0 0 0 16 33.92V216a12 12 0 0 0 12 12h160a12 12 0 0 0 12-12v-70.08A43.94 43.94 0 0 0 236 112zM57.05 52H199l9.14 32H47.91Zm91 56v4a20 20 0 0 1-40 0v-4ZM53 128.71A20 20 0 0 1 44 112v-4h40v4a20 20 0 0 1-20 20a19.76 19.76 0 0 1-9.07-2.2a11.5 11.5 0 0 0-1.93-1.09M196 204H60v-48.19c1.32.12 2.65.19 4 .19a43.86 43.86 0 0 0 32-13.85a43.89 43.89 0 0 0 64 0A43.86 43.86 0 0 0 192 156c1.35 0 2.68-.07 4-.19Zm16-92a20 20 0 0 1-9 16.71a11.7 11.7 0 0 0-1.88 1.09A20 20 0 0 1 172 112v-4h40Z"/></svg><span>Mağazanı əlavə et</span></a
-                >
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div class="p-3.5 rounded-xl bg-muted/40 border border-border/80 space-y-1.5">
-                  <div class="flex items-center gap-1.5 font-bold text-foreground">
-                    <svg width="15" height="15" class="text-emerald-500 shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m45.66 85.66l-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32"/></svg><span>100% Pulsuz Dərc</span>
-                  </div>
-                  <p class="text-muted-foreground text-[11px] leading-relaxed">
-                    Mağaza qeydiyyatı və kampaniyaların yerləşdirilməsi ödənişsizdir.
-                  </p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-muted/40 border border-border/80 space-y-1.5">
-                  <div class="flex items-center gap-1.5 font-bold text-foreground">
-                    <svg width="15" height="15" class="text-primary shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M208 40H48a16 16 0 0 0-16 16v56c0 52.72 25.52 84.67 46.93 102.19c23.06 18.86 46 25.27 47 25.53a8 8 0 0 0 4.2 0c1-.26 23.91-6.67 47-25.53C198.48 196.67 224 164.72 224 112V56a16 16 0 0 0-16-16m-37 87.43l-30.31 12.12l17.71 23.65a8 8 0 1 1-12.8 9.6L128 149.33l-17.6 23.47a8 8 0 1 1-12.8-9.6l17.74-23.65L85 127.43a8 8 0 1 1 6-14.86l29 11.61V96a8 8 0 0 1 16 0v28.18l29-11.61a8 8 0 1 1 6 14.86"/></svg><span>Moderator Təsdiqi</span>
-                  </div>
-                  <p class="text-muted-foreground text-[11px] leading-relaxed">
-                    Bütün elanlar dərc olunmazdan əvvəl moderatorlar tərəfindən yoxlanılır.
-                  </p>
-                </div>
-                <div class="p-3.5 rounded-xl bg-muted/40 border border-border/80 space-y-1.5">
-                  <div class="flex items-center gap-1.5 font-bold text-foreground">
-                    <svg width="15" height="15" class="text-rose-500 shrink-0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></svg><span>Meta / Instagram Bağlantısı</span>
-                  </div>
-                  <p class="text-muted-foreground text-[11px] leading-relaxed">
-                    Hesabınızı qoşun, yeni paylaşımlarınız avtomatik kampaniya qaralamasına
-                    çevrilsin.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <!-- seo:start -->
-      <section style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;font-family:Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
-        <h2 style="font-family:Fraunces,Georgia,serif;font-size:1.6rem;margin:0 0 .4rem;color:#14213d">Bu günün endirimləri</h2>
-        <p style="margin:0 0 1rem;color:#5c6479">65 mağazada <b>1445</b> aktiv endirim. <a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
-        <div style="display:flex;flex-wrap:wrap;gap:.5rem"><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/meiset-texnikasi/">Məişət texnikası endirimləri <b>330</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/elektronika/">Elektronika endirimləri <b>247</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/gozellik/">Gözəllik və baxım endirimləri <b>236</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/ev-ve-bag/">Ev və bağ endirimləri <b>129</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/temir-tikinti/">Təmir-tikinti endirimləri <b>122</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/geyim/">Geyim və ayaqqabı endirimləri <b>104</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/usaq-mehsullari/">Uşaq aləmi endirimləri <b>79</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/idman/">İdman və istirahət endirimləri <b>52</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/restoran/">Restoran və kafe endirimləri <b>46</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/sehiyye/">Sağlamlıq endirimləri <b>33</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/eylence/">Əyləncə və hobbi endirimləri <b>28</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/heyvanlar/">Ev heyvanları endirimləri <b>24</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/market/">Market endirimləri <b>10</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/avtomobil/">Avtomobil endirimləri <b>2</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/diger/">Digər endirimləri <b>1</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/xidmetler/">Xidmətlər endirimləri <b>1</b></a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/seyahet-turizm/">Səyahət endirimləri <b>1</b></a></div>
-        <script type="application/ld+json">[{"@context":"https://schema.org","@type":"Organization","name":"Dropy","url":"https://dropy.az","logo":"https://dropy.az/assets/icon.png","email":"support@dropy.az"},{"@context":"https://schema.org","@type":"WebSite","name":"Dropy","url":"https://dropy.az","inLanguage":"az"},{"@context":"https://schema.org","@type":"MobileApplication","name":"Dropy","operatingSystem":"ANDROID","applicationCategory":"ShoppingApplication","installUrl":"https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru","offers":{"@type":"Offer","price":"0","priceCurrency":"AZN"}}]</script>
+        </div>
+      </section>
+    </main>
+
+    <!-- seo:start -->
+      <section style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;font-family:'Manrope Variable',Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
+        <h2 style="font-family:'Fraunces Variable',Fraunces,Georgia,serif;font-size:1.6rem;margin:0 0 .4rem;color:#14213d">Kateqoriyalar üzrə endirimlər</h2>
+        <p style="margin:0 0 1rem;color:#5c6479"><a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem"><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/meiset-texnikasi/">Məişət texnikası endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/elektronika/">Elektronika endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/gozellik/">Gözəllik və baxım endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/ev-ve-bag/">Ev və bağ endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/temir-tikinti/">Təmir-tikinti endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/geyim/">Geyim və ayaqqabı endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/usaq-mehsullari/">Uşaq aləmi endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/idman/">İdman və istirahət endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/restoran/">Restoran və kafe endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/sehiyye/">Sağlamlıq endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/eylence/">Əyləncə və hobbi endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/heyvanlar/">Ev heyvanları endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/market/">Market endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/avtomobil/">Avtomobil endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/diger/">Digər endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/xidmetler/">Xidmətlər endirimləri</a><a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" href="/endirimler/seyahet-turizm/">Səyahət endirimləri</a></div>
+        <script type="application/ld+json">[{"@context":"https://schema.org","@type":"Organization","name":"Dropy.az","url":"https://dropy.az","logo":"https://dropy.az/assets/icon.png","email":"support@dropy.az"},{"@context":"https://schema.org","@type":"WebSite","name":"Dropy.az","url":"https://dropy.az","inLanguage":"az"},{"@context":"https://schema.org","@type":"MobileApplication","name":"Dropy.az","operatingSystem":"ANDROID, IOS","applicationCategory":"ShoppingApplication","installUrl":"https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru","offers":{"@type":"Offer","price":"0","priceCurrency":"AZN"}}]</script>
       </section>
       <!-- seo:end -->
-      <footer id="destek" class="border-t border-border bg-card py-8 sm:py-10">
-        <div
-          class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground"
-        >
-          <div class="space-y-1 text-center sm:text-left">
-            <p class="font-bold text-foreground">© 2026 «OMNİ GATE» MMC · VÖEN 3105969611 · Dropy</p>
-            <p class="text-[11px]">
-              Azərbaycanda endirim və kampaniyaların vahid aqreqator platforması
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs">
-            <a
-              href="https://legal.dropy.az"
-              target="_blank"
-              class="hover:text-foreground transition-colors"
-              >Məxfilik siyasəti</a
-            ><a
-              href="https://legal.dropy.az"
-              target="_blank"
-              class="hover:text-foreground transition-colors"
-              >İstifadə qaydaları</a
-            ><a
-              href="mailto:support@dropy.az"
-              class="hover:text-foreground transition-colors font-semibold text-primary"
-              >support@dropy.az</a
-            >
-          </div>
-        </div>
-      </footer>
-    </div>
+    <footer>
+      <div class="wrap">
+        <span>© 2026 «OMNİ GATE» MMC · VÖEN 3105969611 · Dropy.az</span>
+        <nav aria-label="Hüquqi">
+          <a href="https://legal.dropy.az">Məxfilik siyasəti</a>
+          <a href="https://legal.dropy.az">İstifadə qaydaları</a>
+          <a href="/destek/">Dəstək</a>
+          <a href="mailto:support@dropy.az">support@dropy.az</a>
+        </nav>
+      </div>
+    </footer>
   </body>
 </html>

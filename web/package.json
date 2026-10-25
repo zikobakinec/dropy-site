@@ -1,0 +1,30 @@
+{
+  "name": "dropy-site-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "clean": "node -e \"require('fs').rmSync('../assets/web',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc --noEmit && vite build && node ../seo/apply-landing.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "5.1.0",
+    "@fontsource-variable/manrope": "5.1.0",
+    "@react-three/fiber": "8.17.10",
+    "gsap": "3.12.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.169.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@types/node": "22.9.0",
+    "@types/three": "0.169.0",
+    "@vitejs/plugin-react": "4.3.3",
+    "typescript": "5.6.3",
+    "vite": "5.4.10",
+    "vitest": "2.1.4"
+  }
+}
