@@ -502,25 +502,25 @@ ${grid(similar)}` : "") +
 const START = "<!-- seo:start -->";
 const END = "<!-- seo:end -->";
 
-export function landingBlock(categories, stores, total) {
-  const links = categories.map((c) => `<a href="/endirimler/${c.slug}/">${esc(c.name)} endirimləri <b>${c.items.length}</b></a>`).join("");
+export function landingBlock(categories, stores, _total) {
+  const links = categories.map((c) => `<a href="/endirimler/${c.slug}/">${esc(c.name)} endirimləri</a>`).join("");
   const ld = jsonLd([
-    { "@context": "https://schema.org", "@type": "Organization", name: "Dropy", url: SITE, logo: `${SITE}/assets/icon.png`, email: "support@dropy.az" },
-    { "@context": "https://schema.org", "@type": "WebSite", name: "Dropy", url: SITE, inLanguage: "az" },
+    { "@context": "https://schema.org", "@type": "Organization", name: "Dropy.az", url: SITE, logo: `${SITE}/assets/icon.png`, email: "support@dropy.az" },
+    { "@context": "https://schema.org", "@type": "WebSite", name: "Dropy.az", url: SITE, inLanguage: "az" },
     {
       "@context": "https://schema.org",
       "@type": "MobileApplication",
-      name: "Dropy",
-      operatingSystem: "ANDROID",
+      name: "Dropy.az",
+      operatingSystem: "ANDROID, IOS",
       applicationCategory: "ShoppingApplication",
       installUrl: PLAY_URL,
       offers: { "@type": "Offer", price: "0", priceCurrency: "AZN" },
     },
   ]);
   return `${START}
-      <section style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;font-family:Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
-        <h2 style="font-family:Fraunces,Georgia,serif;font-size:1.6rem;margin:0 0 .4rem;color:#14213d">Bu günün endirimləri</h2>
-        <p style="margin:0 0 1rem;color:#5c6479">${stores.length} mağazada <b>${total}</b> aktiv endirim. <a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
+      <section style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;font-family:'Manrope Variable',Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
+        <h2 style="font-family:'Fraunces Variable',Fraunces,Georgia,serif;font-size:1.6rem;margin:0 0 .4rem;color:#14213d">Kateqoriyalar üzrə endirimlər</h2>
+        <p style="margin:0 0 1rem;color:#5c6479"><a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">${links.replace(/<a /g, '<a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" ')}</div>
         ${ld}
       </section>
@@ -535,6 +535,7 @@ export function injectLanding(html, block) {
 // ---------- landing deals + stores blocks (redesigned landing, 2026-10-25) ----------
 
 export const LANDING_DEALS = 8;
+const DEAD_IMAGE_HOSTS = ["ikxdwpudoozttggaoccl.supabase.co"];
 export const DEALS_START = "<!-- deals:start -->";
 export const DEALS_END = "<!-- deals:end -->";
 export const STORES_START = "<!-- stores:start -->";
@@ -542,7 +543,7 @@ export const STORES_END = "<!-- stores:end -->";
 
 /** The landing's "Bu günün endirimləri": real photos only, one store at a time. */
 export function landingDeals(campaigns) {
-  return spreadByStore(campaigns.filter((c) => isHttpUrl(c.image_url))).slice(0, LANDING_DEALS);
+  return spreadByStore(campaigns.filter((c) => isHttpUrl(c.image_url) && !DEAD_IMAGE_HOSTS.some((h) => c.image_url.includes(h)))).slice(0, LANDING_DEALS);
 }
 
 export function dealsBlock(items) {
@@ -564,7 +565,7 @@ function initials(name) {
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
+    .map((w) => w[0].toLocaleUpperCase("az"))
     .join("");
 }
 
@@ -590,9 +591,9 @@ export function injectBetween(html, start, end, inner) {
 
 /** Applies the cached seo/landing.json blocks (also used after each vite build). */
 export function applyLanding(html, { seo, deals, stores }) {
-  let out = injectLanding(html, seo);
-  out = injectBetween(out, DEALS_START, DEALS_END, deals);
-  out = injectBetween(out, STORES_START, STORES_END, stores);
+  let out = injectLanding(html, seo ?? "");
+  out = injectBetween(out, DEALS_START, DEALS_END, deals ?? "");
+  out = injectBetween(out, STORES_START, STORES_END, stores ?? "");
   return out;
 }
 
@@ -660,7 +661,7 @@ async function main() {
       .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${day}</lastmod><changefreq>daily</changefreq></url>`)
       .join("\n")}\n</urlset>\n`,
   );
-  writeFileSync(join(ROOT, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+  writeFileSync(join(ROOT, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /web/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
   const landing = {
     seo: landingBlock(categories, stores, categories.reduce((n, c) => n + c.items.length, 0)),

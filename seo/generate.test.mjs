@@ -95,11 +95,12 @@ test("an ended campaign page is noindex and points to live alternatives", () => 
 });
 
 test("landingDeals keeps only deals with a real image, spread by store, at most LANDING_DEALS", () => {
-  const rows = [row(1, "era", 50), row(2, "era", 40), row(3, "bravo", 30), { ...row(4, "oba", 20), image_url: null }];
+  const rows = [row(1, "era", 50), row(2, "era", 40), row(3, "bravo", 30), { ...row(4, "oba", 20), image_url: null }, { ...row(5, "dead", 20), image_url: "https://ikxdwpudoozttggaoccl.supabase.co/x.webp" }];
   for (let i = 10; i < 30; i++) rows.push(row(i, `s${i}`, 10));
   const out = landingDeals(rows);
   assert.equal(out.length, LANDING_DEALS);
   assert.ok(out.every((c) => c.image_url.startsWith("https://")));
+  assert.ok(out.every((c) => !c.image_url.includes("ikxdwpudoozttggaoccl")));
   assert.notEqual(out[0].stores.slug, out[1].stores.slug);
 });
 

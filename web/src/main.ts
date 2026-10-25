@@ -10,6 +10,16 @@ document.documentElement.dataset.tier = tier;
 initTilt();
 
 if (!env.reducedMotion) {
+  const track = document.querySelector(".marquee-track");
+  if (track) {
+    for (const child of Array.from(track.children)) {
+      const clone = child.cloneNode(true) as HTMLElement;
+      clone.setAttribute("aria-hidden", "true");
+      if (clone instanceof HTMLAnchorElement) clone.tabIndex = -1;
+      clone.querySelectorAll("a").forEach((a) => (a.tabIndex = -1));
+      track.appendChild(clone);
+    }
+  }
   import("./scroll").then((m) => {
     m.initReveals();
     if (tier !== "none") m.trackProgress(progress);

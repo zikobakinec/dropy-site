@@ -61,7 +61,7 @@ function Floater({ slot, i, count, progress }: { slot: Slot; i: number; count: n
     }
   });
   return (
-    <group ref={ref} position={heroOf(slot, false)} scale={slot.scale}>
+    <group ref={ref} position={heroOf(slot, window.innerWidth < window.innerHeight)} scale={slot.scale}>
       <Shape slot={slot} />
     </group>
   );
