@@ -45,15 +45,32 @@ export function scatterOf(slot: Slot): Vec3 {
   return [slot.home[0] * 2.2, slot.home[1] * 2.2, slot.home[2] - 2];
 }
 
+/** Hero text column in world units at z=0 (camera z=8, fov 40, wide screens). */
+export const TEXT_ZONE = { minX: -2.8, maxX: 2.0, minY: -2.2, maxY: 2.2 } as const;
+
+/** Moves a hero position out of the text column, to the nearer side. */
+export function clearOfText([x, y, z]: Vec3): Vec3 {
+  const inside = x > TEXT_ZONE.minX && x < TEXT_ZONE.maxX && y > TEXT_ZONE.minY && y < TEXT_ZONE.maxY;
+  if (!inside) return [x, y, z];
+  return [x < (TEXT_ZONE.minX + TEXT_ZONE.maxX) / 2 ? TEXT_ZONE.minX - 0.8 : TEXT_ZONE.maxX + 1.0, y, z];
+}
+
+/** Hero pose: clear of the text on wide screens; pushed back and narrowed on phones, where text spans the width. */
+export function heroOf(slot: Slot, narrow: boolean): Vec3 {
+  if (narrow) return [slot.home[0] * 0.6, slot.home[1], slot.home[2] - 3];
+  return clearOfText(slot.home);
+}
+
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp3 = (a: Vec3, b: Vec3, t: number): Vec3 => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 /** progress 0..1 across hero → steps: hold, scatter (0.2–0.35), then one formation per step. */
 export function targetAt(slot: Slot, i: number, count: number, progress: number, narrow: boolean): Vec3 {
   const p = Math.min(1, Math.max(0, progress));
-  if (p <= 0.2) return slot.home;
+  const hero = heroOf(slot, narrow);
+  if (p <= 0.2) return hero;
   const scattered = scatterOf(slot);
-  if (p <= 0.35) return lerp3(slot.home, scattered, smooth((p - 0.2) / 0.15));
+  if (p <= 0.35) return lerp3(hero, scattered, smooth((p - 0.2) / 0.15));
   const stepsP = ((p - 0.35) / 0.65) * STEP_COUNT;
   const step = Math.min(STEP_COUNT - 1, Math.floor(stepsP));
   const local = smooth(Math.min(1, (stepsP - step) * 2));

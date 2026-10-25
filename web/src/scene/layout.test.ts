@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { makeSlots, targetAt, formation, scatterOf } from "./layout";
+import { makeSlots, targetAt, formation, scatterOf, heroOf, TEXT_ZONE } from "./layout";
 
 describe("makeSlots", () => {
   it("is deterministic for a seed and mixes all three kinds", () => {
@@ -14,8 +14,8 @@ describe("targetAt", () => {
   const slots = makeSlots(12, 7);
   const s = slots[4]!;
   it("holds the hero pose at the top of the page", () => {
-    expect(targetAt(s, 4, 12, 0, false)).toEqual(s.home);
-    expect(targetAt(s, 4, 12, 0.2, false)).toEqual(s.home);
+    expect(targetAt(s, 4, 12, 0, false)).toEqual(heroOf(s, false));
+    expect(targetAt(s, 4, 12, 0.2, false)).toEqual(heroOf(s, false));
   });
   it("is fully scattered when the steps begin", () => {
     expect(targetAt(s, 4, 12, 0.35, false)).toEqual(scatterOf(s));
@@ -36,5 +36,19 @@ describe("targetAt", () => {
   });
   it("always returns finite numbers", () => {
     for (let p = -0.5; p <= 1.5; p += 0.05) targetAt(s, 4, 12, p, true).forEach((v) => expect(Number.isFinite(v)).toBe(true));
+  });
+});
+
+describe("heroOf", () => {
+  it("never leaves a wide-screen hero object inside the text column", () => {
+    for (const s of makeSlots(16, 7)) {
+      const [x, y] = heroOf(s, false);
+      const inside = x > TEXT_ZONE.minX && x < TEXT_ZONE.maxX && y > TEXT_ZONE.minY && y < TEXT_ZONE.maxY;
+      expect(inside).toBe(false);
+    }
+  });
+  it("pushes hero objects back on narrow screens", () => {
+    const s = makeSlots(9, 7)[0]!;
+    expect(heroOf(s, true)[2]).toBe(s.home[2] - 3);
   });
 });

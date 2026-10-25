@@ -2,18 +2,22 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { geo, mat, labelTexture } from "./geometry";
-import { makeSlots, targetAt, type Slot } from "./layout";
+import { heroOf, makeSlots, targetAt, type Slot } from "./layout";
 import { OBJECTS } from "./tier";
 
 export interface SceneProps { tier: "high" | "low"; progress: { current: number } }
 
 function Shape({ slot }: { slot: Slot }) {
   const label = useMemo(() => (slot.kind === "tag" ? labelTexture(slot.label) : null), [slot]);
+  useEffect(() => () => label?.dispose(), [label]);
   if (slot.kind === "tag")
     return (
       <group>
         <mesh geometry={geo.tag} material={slot.label === "-50%" ? mat.teal : mat.coral} castShadow receiveShadow />
         <mesh geometry={geo.label} position={[-0.1, 0, 0.08]}>
+          <meshBasicMaterial map={label} transparent toneMapped={false} />
+        </mesh>
+        <mesh geometry={geo.label} position={[-0.1, 0, -0.08]} rotation={[0, Math.PI, 0]}>
           <meshBasicMaterial map={label} transparent toneMapped={false} />
         </mesh>
       </group>
@@ -51,7 +55,7 @@ function Floater({ slot, i, count, progress }: { slot: Slot; i: number; count: n
     g.rotation.y = slot.spin[1] + t * 0.2 + pointer.x * 0.5;
   });
   return (
-    <group ref={ref} position={slot.home} scale={slot.scale}>
+    <group ref={ref} position={heroOf(slot, false)} scale={slot.scale}>
       <Shape slot={slot} />
     </group>
   );
