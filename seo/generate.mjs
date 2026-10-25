@@ -532,6 +532,70 @@ export function injectLanding(html, block) {
   return html.replace(/(\s*<footer\b)/, `\n      ${block}$1`);
 }
 
+// ---------- landing deals + stores blocks (redesigned landing, 2026-10-25) ----------
+
+export const LANDING_DEALS = 8;
+export const DEALS_START = "<!-- deals:start -->";
+export const DEALS_END = "<!-- deals:end -->";
+export const STORES_START = "<!-- stores:start -->";
+export const STORES_END = "<!-- stores:end -->";
+
+/** The landing's "Bu günün endirimləri": real photos only, one store at a time. */
+export function landingDeals(campaigns) {
+  return spreadByStore(campaigns.filter((c) => isHttpUrl(c.image_url))).slice(0, LANDING_DEALS);
+}
+
+export function dealsBlock(items) {
+  return items
+    .map((c) => {
+      const href = esc(campaignPath(c));
+      return `
+          <a class="deal-card" href="${href}">
+            <span class="deal-img"><img src="${esc(c.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">${esc(badge(c))}</span></span>
+            <span class="deal-store">${esc(c.stores?.name ?? "")}</span>
+            <span class="deal-title">${esc(c.title)}</span>
+          </a>`;
+    })
+    .join("");
+}
+
+function initials(name) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
+export function storesBlock(stores) {
+  return stores
+    .map((s) => {
+      const logo = s.items.find((c) => isHttpUrl(c.stores?.logo_url))?.stores.logo_url;
+      const mark = logo
+        ? `<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+        : `<span class="store-initials">${esc(initials(s.name))}</span>`;
+      return `
+          <a class="store-chip" href="/magaza/${esc(urlSlug(s.slug))}/">${mark}<span>${esc(s.name)}</span></a>`;
+    })
+    .join("");
+}
+
+export function injectBetween(html, start, end, inner) {
+  const i = html.indexOf(start);
+  const j = html.indexOf(end, i + start.length);
+  if (i === -1 || j === -1) return html;
+  return html.slice(0, i + start.length) + inner + html.slice(j);
+}
+
+/** Applies the cached seo/landing.json blocks (also used after each vite build). */
+export function applyLanding(html, { seo, deals, stores }) {
+  let out = injectLanding(html, seo);
+  out = injectBetween(out, DEALS_START, DEALS_END, deals);
+  out = injectBetween(out, STORES_START, STORES_END, stores);
+  return out;
+}
+
 // ---------- main ----------
 
 async function main() {
@@ -598,8 +662,14 @@ async function main() {
   );
   writeFileSync(join(ROOT, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
+  const landing = {
+    seo: landingBlock(categories, stores, categories.reduce((n, c) => n + c.items.length, 0)),
+    deals: dealsBlock(landingDeals(campaigns)),
+    stores: storesBlock(stores),
+  };
+  writeFileSync(join(ROOT, "seo", "landing.json"), JSON.stringify(landing, null, 2) + "\n");
   const indexFile = join(ROOT, "index.html");
-  writeFileSync(indexFile, injectLanding(readFileSync(indexFile, "utf8"), landingBlock(categories, stores, categories.reduce((n, c) => n + c.items.length, 0))));
+  writeFileSync(indexFile, applyLanding(readFileSync(indexFile, "utf8"), landing));
 
   console.log(`${rows.length} campaigns → ${Object.keys(pages).length} pages, ${Object.keys(registry).length} store URLs, ${urls.length} sitemap URLs`);
 }
