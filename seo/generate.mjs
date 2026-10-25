@@ -535,7 +535,6 @@ export function injectLanding(html, block) {
 // ---------- landing deals + stores blocks (redesigned landing, 2026-10-25) ----------
 
 export const LANDING_DEALS = 8;
-const DEAD_IMAGE_HOSTS = ["ikxdwpudoozttggaoccl.supabase.co"];
 export const DEALS_START = "<!-- deals:start -->";
 export const DEALS_END = "<!-- deals:end -->";
 export const STORES_START = "<!-- stores:start -->";
@@ -543,7 +542,7 @@ export const STORES_END = "<!-- stores:end -->";
 
 /** The landing's "Bu günün endirimləri": real photos only, one store at a time. */
 export function landingDeals(campaigns) {
-  return spreadByStore(campaigns.filter((c) => isHttpUrl(c.image_url) && !DEAD_IMAGE_HOSTS.some((h) => c.image_url.includes(h)))).slice(0, LANDING_DEALS);
+  return spreadByStore(campaigns.filter((c) => isHttpUrl(c.image_url))).slice(0, LANDING_DEALS);
 }
 
 export function dealsBlock(items) {
