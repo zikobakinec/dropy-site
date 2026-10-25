@@ -1,15 +1,17 @@
 # dropy.az
 
-Public site for Dropy: landing page (`/`, App Store marketing URL) and support page (`/destek/`, App Store support URL). Privacy policy / terms live separately at legal.dropy.az (repo `dropy-legal`).
+Public site for Dropy.az: landing page (`/`, App Store marketing URL) and support page (`/destek/`, App Store support URL). Privacy policy / terms live separately at legal.dropy.az (repo `dropy-legal`).
 
-Design source of truth is the Sleek project "Azerbaijan Deals" — screens **Dropy Web: Landing** and **Dropy Web: Support**. `build/sleek-*.html` are those screens' exports.
+## Landing + support pages (web/)
 
-## Rebuild after a Sleek change
+Source is `web/` (Vite + React + TypeScript; the 3D hero is React Three Fiber + GSAP ScrollTrigger, lazy-loaded). The pages themselves are static HTML in `web/index.html` and `web/destek/index.html`; React mounts only the decorative canvas.
 
-1. Replace `build/sleek-landing.html` / `build/sleek-support.html` with the new exports.
-2. `cd build && npm install && npm run build`
+    cd web && npm install
+    npm run dev     # local preview (deals/stores/seo blocks are empty in dev)
+    npm test        # scene layout + device tier unit tests
+    npm run build   # writes index.html, destek/index.html, assets/web/ into the repo root, then re-applies seo/landing.json
 
-`build.py` precompiles Tailwind (no in-browser compiler), inlines the Iconify icons as SVG, vendors images into `assets/`, fixes placeholder links, and applies the few copy corrections documented inline (e.g. both store badges stay "Tezliklə" until the listings are live).
+`web/src/ui/` (tokens) is meant to be shared with the planned seller panel (`/panel`, phase 2).
 
 Hosted on GitHub Pages (custom domain in `CNAME`).
 
@@ -22,6 +24,7 @@ Hosted on GitHub Pages (custom domain in `CNAME`).
 - `/magazalar/` and `/magaza/<slug>/`: the store index and one page per store
 - `/kampaniya/<ad>-<id>/`: one page per campaign, with Product data when a price pair is known
 - `sitemap.xml` and `robots.txt`
+- the landing's `<!-- deals:start -->` (8 deal cards) and `<!-- stores:start -->` (logo marquee) blocks, cached in `seo/landing.json` and re-applied by `seo/apply-landing.mjs` after each `web` build
 - a marked `<!-- seo:start -->` block of links and structured data in `index.html`
 
 Cards link to the campaign page, and that page links out to the store. Every page has the Google Play button.
