@@ -30,13 +30,15 @@ const APP_STORE_URL = "https://apps.apple.com/az/app/id6819821532";
 const FEED_SELECT =
   "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
-// Until the site carries its own ads (AdSense), it is a store directory plus a
-// small showcase of deals, not the whole catalog: a visitor who sees every
-// deal on the web has no reason to open the app (user, 2026-10-29). Store
-// pages list no deals; only the showcase deals get /kampaniya/ pages.
-// Set FULL_CATALOG to true to publish everything again.
+// Until the site carries its own ads (AdSense), it shows a taste of each shelf,
+// not the whole catalog: a visitor who sees every deal on the web has no reason
+// to open the app (user, 2026-10-29). Search traffic comes from store and
+// category pages ("rahat market endirim", "era electronics"), so those stay,
+// each with its best few deals and "the rest is in the app". Only deals shown
+// somewhere get a /kampaniya/ page. FULL_CATALOG = true publishes everything.
 const FULL_CATALOG = false;
 const SHOWCASE_LIMIT = 20;
+const PAGE_TOP = 5;
 const ENDED_KEEP_DAYS = 30;
 
 const AZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
@@ -278,16 +280,25 @@ export function buildSite(rows, now = new Date()) {
   const stores = [...byStore.values()].sort((a, b) => a.name.localeCompare(b.name, "az"));
   const catLinks = categories.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name, count: c.items.length }));
   const pages = {};
-  const shown = FULL_CATALOG ? campaigns : spreadByStore(campaigns).slice(0, SHOWCASE_LIMIT);
+  const best = (items) => [...items].sort((a, b) => percentOf(b) - percentOf(a)).slice(0, PAGE_TOP);
+  const hubDeals = spreadByStore(campaigns).slice(0, FULL_CATALOG ? HUB_LIMIT : SHOWCASE_LIMIT);
+  const shownById = new Map(hubDeals.map((c) => [c.id, c]));
+  for (const st of stores) for (const c of best(st.items)) shownById.set(c.id, c);
+  for (const cat of categories) for (const c of spreadByStore(cat.items).slice(0, PAGE_TOP)) shownById.set(c.id, c);
+  const shown = FULL_CATALOG ? campaigns : [...shownById.values()];
+  const inApp = (total, listed) =>
+    total > listed
+      ? `      <p class="lead"><b>Qalan ${total - listed} endirim Dropy.az tətbiqində.</b> Yeni endirim çıxanda tətbiq bildiriş göndərir.</p>\n`
+      : "";
 
   // Hub
   {
     const path = "/endirimler/";
-    const top = FULL_CATALOG ? spreadByStore(campaigns).slice(0, HUB_LIMIT) : shown;
-    const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Endirimlər", path }]);
+    const top = hubDeals;
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirimlər", path }]);
     pages[path] =
       head({
-        title: `Endirimlər və kampaniyalar — bu günün ${campaigns.length} real endirimi | Dropy`,
+        title: `Endirimlər, kampaniyalar və aksiyalar — ${stores.length} mağaza | Dropy.az`,
         description: `${stores.length} mağazanın ${campaigns.length} aktiv endirimi və kampaniyası bir yerdə: elektronika, geyim, market, kosmetika, ev və daha çoxu. Hər gün yenilənir.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd("Bu günün endirimləri", top)}\n`,
@@ -296,7 +307,7 @@ export function buildSite(rows, now = new Date()) {
       `      <h1>Bu günün endirimləri və kampaniyaları</h1>
       <p class="lead">${stores.length} mağazanın öz saytından toplanmış <b>${campaigns.length}</b> aktiv endirim. Hər endirim mağazanın öz səhifəsinə aparır, hər gün yenilənir.</p>
 ` +
-      (FULL_CATALOG ? chips(catLinks) : "") +
+      chips(catLinks) +
       appBanner() +
       `      <h2>${FULL_CATALOG ? "Ən çox endirim olanlar" : "Seçilmiş endirimlər — hamısı Dropy.az tətbiqində"}</h2>\n` +
       grid(top) +
@@ -306,26 +317,28 @@ export function buildSite(rows, now = new Date()) {
   }
 
   // Categories
-  for (const cat of FULL_CATALOG ? categories : []) {
+  for (const cat of categories) {
     const path = `/endirimler/${cat.slug}/`;
-    const items = spreadByStore(cat.items);
-    const catStores = [...new Map(items.map((c) => [c.stores.slug, c.stores])).values()];
-    const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Endirimlər", path: "/endirimler/" }, { name: cat.name, path }]);
+    const all = spreadByStore(cat.items);
+    const items = FULL_CATALOG ? all : all.slice(0, PAGE_TOP);
+    const catStores = [...new Map(all.map((c) => [c.stores.slug, c.stores])).values()];
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirimlər", path: "/endirimler/" }, { name: cat.name, path }]);
     const storeNames = catStores.slice(0, 6).map((s) => s.name).join(", ");
     pages[path] =
       head({
-        title: `${cat.name} endirimləri — ${items.length} aktiv kampaniya | Dropy`,
-        description: `${cat.name} üzrə ${items.length} aktiv endirim: ${storeNames}${catStores.length > 6 ? " və digərləri" : ""}. Real qiymətlər, mağazanın öz saytından.`,
+        title: `${cat.name} endirimləri — ${all.length} aktiv kampaniya | Dropy.az`,
+        description: `${cat.name} üzrə ${all.length} aktiv endirim: ${storeNames}${catStores.length > 6 ? " və digərləri" : ""}. Real qiymətlər, mağazanın öz saytından.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${cat.name} endirimləri`, items)}\n`,
       }) +
       crumbs.html +
       `      <h1>${esc(cat.name)} endirimləri</h1>
-      <p class="lead">${catStores.length} mağazada <b>${items.length}</b> aktiv ${esc(cat.name.toLocaleLowerCase("az"))} endirimi və kampaniyası.</p>
+      <p class="lead">${catStores.length} mağazada <b>${all.length}</b> aktiv ${esc(cat.name.toLocaleLowerCase("az"))} endirimi və kampaniyası.</p>
 ` +
       chips(catStores.map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: s.name, count: byStore.get(s.slug).items.filter((c) => c.categories.slug === cat.slug).length }))) +
       appBanner() +
       grid(items) +
+      inApp(all.length, items.length) +
       `      <h2>Digər kateqoriyalar</h2>\n` +
       chips(catLinks.filter((l) => l.path !== path)) +
       foot(updated);
@@ -337,10 +350,10 @@ export function buildSite(rows, now = new Date()) {
     const items = [...st.items].sort((a, b) => percentOf(b) - percentOf(a));
     const cats = [...new Map(items.map((c) => [c.categories.slug, c.categories])).values()];
     const best = items.reduce((m, c) => Math.max(m, percentOf(c)), 0);
-    const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: st.name, path }]);
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: st.name, path }]);
     pages[path] =
       head({
-        title: `${st.name} endirimləri və kampaniyaları (${items.length}) | Dropy`,
+        title: `${st.name} endirimləri və kampaniyaları (${items.length}) | Dropy.az`,
         description: `${st.name}-in ${items.length} aktiv endirimi${best ? `, ${best}%-dək` : ""}. Hər endirim ${st.name}-in öz saytına aparır, hər gün yenilənir.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${st.name} endirimləri`, items)}\n`,
@@ -349,21 +362,20 @@ export function buildSite(rows, now = new Date()) {
       `      <h1>${esc(st.name)} endirimləri</h1>
       <p class="lead"><b>${items.length}</b> aktiv endirim və kampaniya${best ? `, ${best}%-dək` : ""}.</p>
 ` +
-      (FULL_CATALOG
-        ? chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length })))
-        : `      <p>${esc(st.name)}-in bütün endirimlərini Dropy.az tətbiqində izlə — yeni endirim çıxanda bildiriş gəlir.</p>\n`) +
+      chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length }))) +
       appBanner() +
-      (FULL_CATALOG ? grid(items, { showStore: false }) : "") +
+      grid(FULL_CATALOG ? items : items.slice(0, PAGE_TOP), { showStore: false }) +
+      (FULL_CATALOG ? "" : inApp(items.length, Math.min(items.length, PAGE_TOP))) +
       foot(updated);
   }
 
   // Store index
   {
     const path = "/magazalar/";
-    const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Mağazalar", path }]);
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path }]);
     pages[path] =
       head({
-        title: `Endirim olan mağazalar — ${stores.length} mağaza | Dropy`,
+        title: `Endirim olan mağazalar — ${stores.length} mağaza | Dropy.az`,
         description: `Hazırda endirimi olan ${stores.length} mağaza: hər birinin aktiv endirim və kampaniyaları bir səhifədə.`,
         path,
         extra: `    ${crumbs.ld}\n`,
@@ -384,15 +396,15 @@ export function buildSite(rows, now = new Date()) {
     pages[campaignPath(c)] = campaignPage(c, similar, updated);
   }
 
-  return { pages, categories: FULL_CATALOG ? categories : [], stores, campaigns: shown, updated };
+  return { pages, categories, stores, campaigns: shown, updated };
 }
 
 function emptyStorePage(slug, name, updated) {
   const path = `/magaza/${urlSlug(slug)}/`;
-  const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name, path }]);
+  const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name, path }]);
   return (
     head({
-      title: `${name} endirimləri və kampaniyaları | Dropy`,
+      title: `${name} endirimləri və kampaniyaları | Dropy.az`,
       description: `${name}-in hazırda aktiv endirimi yoxdur. Yeni endirim çıxanda Dropy tətbiqi bildiriş göndərir.`,
       path,
       extra: `    ${crumbs.ld}\n`,
@@ -426,9 +438,9 @@ export function campaignPage(c, similar, updated) {
   const prices = pricePair(c.discount_label) ?? pricePair(c.description);
   const desc = cleanDescription(c.description, c.title);
   const crumbs = breadcrumbs([
-    { name: "Dropy", path: "/" },
+    { name: "Dropy.az", path: "/" },
     { name: "Endirimlər", path: "/endirimler/" },
-    { name: cat.name_az ?? cat.slug, path: FULL_CATALOG ? `/endirimler/${cat.slug}/` : "/endirimler/" },
+    { name: cat.name_az ?? cat.slug, path: `/endirimler/${cat.slug}/` },
     { name: c.title.length > 50 ? `${c.title.slice(0, 50)}…` : c.title, path },
   ]);
   const productLd = prices
@@ -454,7 +466,7 @@ export function campaignPage(c, similar, updated) {
     : "";
   return (
     head({
-      title: `${c.title} — ${b} endirim | ${store.name} | Dropy`,
+      title: `${c.title} — ${b} endirim | ${store.name} | Dropy.az`,
       description: `${store.name}: ${c.title}${prices ? ` — ${prices.oldPrice} ₼ əvəzinə ${prices.newPrice} ₼` : ` — ${b}`}.${realEnd ? ` Son tarix: ${azDate(c.end_date)}.` : ""} Endirimə mağazanın öz saytında bax.`,
       path,
       image: img,
@@ -469,7 +481,7 @@ ${productLd ? `    ${productLd}
           <a class="store" href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}</a>
           <h1>${esc(c.title)}</h1>
           ${priceLine}
-          <p class="meta">${realEnd ? `Son tarix: <b>${esc(azDate(c.end_date))}</b> · ` : ""}Kateqoriya: <a href="${FULL_CATALOG ? `/endirimler/${esc(cat.slug)}/` : "/endirimler/"}">${esc(cat.name_az ?? cat.slug)}</a></p>
+          <p class="meta">${realEnd ? `Son tarix: <b>${esc(azDate(c.end_date))}</b> · ` : ""}Kateqoriya: <a href="/endirimler/${esc(cat.slug)}/">${esc(cat.name_az ?? cat.slug)}</a></p>
           ${isHttpUrl(c.source_url) ? `<a class="btn" href="${esc(c.source_url)}" rel="nofollow noopener" target="_blank">${esc(store.name)} saytında bax →</a>` : ""}
           ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
         </div>
@@ -478,7 +490,7 @@ ${productLd ? `    ${productLd}
     appBanner() +
     (similar.length ? `      <h2>Oxşar endirimlər</h2>
 ${grid(similar)}` : "") +
-    `      <p><a href="${FULL_CATALOG ? `/endirimler/${esc(cat.slug)}/` : "/endirimler/"}">Bütün ${esc((cat.name_az ?? cat.slug).toLocaleLowerCase("az"))} endirimləri →</a></p>
+    `      <p><a href="/endirimler/${esc(cat.slug)}/">Bütün ${esc((cat.name_az ?? cat.slug).toLocaleLowerCase("az"))} endirimləri →</a></p>
 ` +
     foot(updated)
   );
@@ -486,13 +498,13 @@ ${grid(similar)}` : "") +
 
 export function endedCampaignPage(entry, similar, updated) {
   const crumbs = breadcrumbs([
-    { name: "Dropy", path: "/" },
+    { name: "Dropy.az", path: "/" },
     { name: "Endirimlər", path: "/endirimler/" },
     { name: entry.title.length > 50 ? `${entry.title.slice(0, 50)}…` : entry.title, path: entry.path },
   ]);
   return (
     head({
-      title: `${entry.title} — endirim bitib | ${entry.storeName} | Dropy`,
+      title: `${entry.title} — endirim bitib | ${entry.storeName} | Dropy.az`,
       description: `${entry.storeName}-in bu endirimi artıq bitib. ${entry.catName ?? ""} üzrə aktiv endirimlərə Dropy-də bax.`,
       path: entry.path,
       extra: `    <meta name="robots" content="noindex, follow" />
@@ -533,6 +545,7 @@ export function landingBlock(categories, stores, _total) {
   return `${START}
       <section style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;font-family:'Manrope Variable',Manrope,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
         <h2 style="font-family:'Fraunces Variable',Fraunces,Georgia,serif;font-size:1.6rem;margin:0 0 .4rem;color:#14213d">Kateqoriyalar üzrə endirimlər</h2>
+        <p style="margin:0 0 .8rem;color:#5c6479;line-height:1.6">Dropy.az Azərbaycandakı mağazaların endirim, kampaniya və aksiyalarını bir yerdə toplayır: elektronika, məişət texnikası, geyim, market, kosmetika, uşaq məhsulları və daha çox. Endirimlər hər gün mağazaların öz saytlarından yenilənir, hamısı ödənişsiz Dropy.az tətbiqində.</p>
         <p style="margin:0 0 1rem;color:#5c6479"><a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">${links.replace(/<a /g, '<a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" ')}</div>
         ${ld}
