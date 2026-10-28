@@ -46,16 +46,18 @@ test("landing block is inserted once before the footer and replaced on later run
   assert.ok(twice.includes("B") && !twice.includes(">A<"));
 });
 
-test("builds hub, category, store and store-index pages with real links", () => {
+test("showcase mode: hub, store directory and showcase deals only (2026-10-29)", () => {
   const { pages } = buildSite([row(1, "era", 40), row(2, "bravo", 20, "market")], new Date("2026-10-16T08:00:00Z"));
+  // No category pages, and store pages list no deals: the full catalog is the app's.
   assert.deepEqual(Object.keys(pages).sort(), [
-    "/endirimler/", "/endirimler/elektronika/", "/endirimler/market/",
+    "/endirimler/",
     "/kampaniya/mehsul-1-1/", "/kampaniya/mehsul-2-2/",
     "/magaza/bravo/", "/magaza/era/", "/magazalar/",
   ]);
   assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri<\/h1>/);
-  // Cards lead to our own campaign page; only that page links out to the store.
-  assert.match(pages["/magaza/era/"], /href="\/kampaniya\/mehsul-1-1\/"/);
+  assert.doesNotMatch(pages["/magaza/era/"], /href="\/kampaniya\//);
+  // Hub cards lead to our own campaign page; only that page links out to the store.
+  assert.match(pages["/endirimler/"], /href="\/kampaniya\/mehsul-1-1\/"/);
   assert.match(pages["/kampaniya/mehsul-1-1/"], /href="https:\/\/shop\.az\/1" rel="nofollow noopener"/);
   assert.match(pages["/endirimler/"], /<link rel="canonical" href="https:\/\/dropy\.az\/endirimler\/" \/>/);
   assert.doesNotMatch(Object.values(pages).join(""), /Bak[ıi]/);

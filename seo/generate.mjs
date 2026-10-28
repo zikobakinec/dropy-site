@@ -30,6 +30,13 @@ const APP_STORE_URL = "https://apps.apple.com/az/app/id6819821532";
 const FEED_SELECT =
   "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
+// Until the site carries its own ads (AdSense), it is a store directory plus a
+// small showcase of deals, not the whole catalog: a visitor who sees every
+// deal on the web has no reason to open the app (user, 2026-10-29). Store
+// pages list no deals; only the showcase deals get /kampaniya/ pages.
+// Set FULL_CATALOG to true to publish everything again.
+const FULL_CATALOG = false;
+const SHOWCASE_LIMIT = 20;
 const ENDED_KEEP_DAYS = 30;
 
 const AZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
@@ -271,11 +278,12 @@ export function buildSite(rows, now = new Date()) {
   const stores = [...byStore.values()].sort((a, b) => a.name.localeCompare(b.name, "az"));
   const catLinks = categories.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name, count: c.items.length }));
   const pages = {};
+  const shown = FULL_CATALOG ? campaigns : spreadByStore(campaigns).slice(0, SHOWCASE_LIMIT);
 
   // Hub
   {
     const path = "/endirimler/";
-    const top = spreadByStore(campaigns).slice(0, HUB_LIMIT);
+    const top = FULL_CATALOG ? spreadByStore(campaigns).slice(0, HUB_LIMIT) : shown;
     const crumbs = breadcrumbs([{ name: "Dropy", path: "/" }, { name: "Endirimlər", path }]);
     pages[path] =
       head({
@@ -288,9 +296,9 @@ export function buildSite(rows, now = new Date()) {
       `      <h1>Bu günün endirimləri və kampaniyaları</h1>
       <p class="lead">${stores.length} mağazanın öz saytından toplanmış <b>${campaigns.length}</b> aktiv endirim. Hər endirim mağazanın öz səhifəsinə aparır, hər gün yenilənir.</p>
 ` +
-      chips(catLinks) +
+      (FULL_CATALOG ? chips(catLinks) : "") +
       appBanner() +
-      `      <h2>Ən çox endirim olanlar</h2>\n` +
+      `      <h2>${FULL_CATALOG ? "Ən çox endirim olanlar" : "Seçilmiş endirimlər — hamısı Dropy.az tətbiqində"}</h2>\n` +
       grid(top) +
       `      <h2>Mağazalar üzrə endirimlər</h2>\n` +
       chips(stores.map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: s.name, count: s.items.length }))) +
@@ -298,7 +306,7 @@ export function buildSite(rows, now = new Date()) {
   }
 
   // Categories
-  for (const cat of categories) {
+  for (const cat of FULL_CATALOG ? categories : []) {
     const path = `/endirimler/${cat.slug}/`;
     const items = spreadByStore(cat.items);
     const catStores = [...new Map(items.map((c) => [c.stores.slug, c.stores])).values()];
@@ -341,9 +349,11 @@ export function buildSite(rows, now = new Date()) {
       `      <h1>${esc(st.name)} endirimləri</h1>
       <p class="lead"><b>${items.length}</b> aktiv endirim və kampaniya${best ? `, ${best}%-dək` : ""}.</p>
 ` +
-      chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length }))) +
+      (FULL_CATALOG
+        ? chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length })))
+        : `      <p>${esc(st.name)}-in bütün endirimlərini Dropy.az tətbiqində izlə — yeni endirim çıxanda bildiriş gəlir.</p>\n`) +
       appBanner() +
-      grid(items, { showStore: false }) +
+      (FULL_CATALOG ? grid(items, { showStore: false }) : "") +
       foot(updated);
   }
 
@@ -368,12 +378,13 @@ export function buildSite(rows, now = new Date()) {
   }
 
   // Campaigns
-  for (const c of campaigns) {
-    const similar = spreadByStore(byCategory.get(c.categories.slug).items.filter((o) => o.id !== c.id && o.stores.slug !== c.stores.slug)).slice(0, 4);
+  for (const c of shown) {
+    const pool = FULL_CATALOG ? byCategory.get(c.categories.slug).items : shown;
+    const similar = spreadByStore(pool.filter((o) => o.id !== c.id && o.stores.slug !== c.stores.slug)).slice(0, 4);
     pages[campaignPath(c)] = campaignPage(c, similar, updated);
   }
 
-  return { pages, categories, stores, campaigns, updated };
+  return { pages, categories: FULL_CATALOG ? categories : [], stores, campaigns: shown, updated };
 }
 
 function emptyStorePage(slug, name, updated) {
@@ -417,7 +428,7 @@ export function campaignPage(c, similar, updated) {
   const crumbs = breadcrumbs([
     { name: "Dropy", path: "/" },
     { name: "Endirimlər", path: "/endirimler/" },
-    { name: cat.name_az ?? cat.slug, path: `/endirimler/${cat.slug}/` },
+    { name: cat.name_az ?? cat.slug, path: FULL_CATALOG ? `/endirimler/${cat.slug}/` : "/endirimler/" },
     { name: c.title.length > 50 ? `${c.title.slice(0, 50)}…` : c.title, path },
   ]);
   const productLd = prices
@@ -458,7 +469,7 @@ ${productLd ? `    ${productLd}
           <a class="store" href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}</a>
           <h1>${esc(c.title)}</h1>
           ${priceLine}
-          <p class="meta">${realEnd ? `Son tarix: <b>${esc(azDate(c.end_date))}</b> · ` : ""}Kateqoriya: <a href="/endirimler/${esc(cat.slug)}/">${esc(cat.name_az ?? cat.slug)}</a></p>
+          <p class="meta">${realEnd ? `Son tarix: <b>${esc(azDate(c.end_date))}</b> · ` : ""}Kateqoriya: <a href="${FULL_CATALOG ? `/endirimler/${esc(cat.slug)}/` : "/endirimler/"}">${esc(cat.name_az ?? cat.slug)}</a></p>
           ${isHttpUrl(c.source_url) ? `<a class="btn" href="${esc(c.source_url)}" rel="nofollow noopener" target="_blank">${esc(store.name)} saytında bax →</a>` : ""}
           ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
         </div>
@@ -467,7 +478,7 @@ ${productLd ? `    ${productLd}
     appBanner() +
     (similar.length ? `      <h2>Oxşar endirimlər</h2>
 ${grid(similar)}` : "") +
-    `      <p><a href="/endirimler/${esc(cat.slug)}/">Bütün ${esc((cat.name_az ?? cat.slug).toLocaleLowerCase("az"))} endirimləri →</a></p>
+    `      <p><a href="${FULL_CATALOG ? `/endirimler/${esc(cat.slug)}/` : "/endirimler/"}">Bütün ${esc((cat.name_az ?? cat.slug).toLocaleLowerCase("az"))} endirimləri →</a></p>
 ` +
     foot(updated)
   );
@@ -645,6 +656,11 @@ async function main() {
   const activeIds = new Set(campaigns.map((c) => c.id));
   for (const [id, entry] of Object.entries(seen)) {
     if (activeIds.has(id)) continue;
+    // Showcase mode: a deal that left the showcase isn't kept as an ended page.
+    if (!FULL_CATALOG) {
+      delete seen[id];
+      continue;
+    }
     if (nowMs - Date.parse(entry.lastSeen) > ENDED_KEEP_DAYS * 24 * 3600_000) {
       delete seen[id];
       continue;
