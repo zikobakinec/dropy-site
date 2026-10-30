@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "az.endirim.aqreqatoru",
+      "sha256_cert_fingerprints": ["38:71:0F:74:CF:CB:88:B9:89:D3:7F:5D:72:32:F0:B2:11:91:91:7C:8D:94:E7:F2:4F:80:A9:35:34:EB:B3:55"]
+    }
+  }
+]

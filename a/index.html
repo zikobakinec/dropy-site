@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Dropy.az</title>
+    <meta property="og:title" content="Dropy.az — endirimlər bir yerdə" />
+    <meta property="og:image" content="https://dropy.az/assets/icon.png" />
+    <link rel="icon" href="/assets/icon.png" />
+    <link rel="stylesheet" href="/assets/seo.css" />
+    <script>
+      // Links shared from the app (dropy.az/a/?k=<deal>|m=<store>|ref=dost).
+      // With Dropy.az installed, App Links / Universal Links open the app and
+      // this page never loads. Without it, send the phone to its store; the
+      // Play link carries the referrer for attribution.
+      (function () {
+        var q = new URLSearchParams(location.search);
+        var kind = q.get("k") ? "deal" : q.get("m") ? "store" : "invite";
+        var ref = "utm_source=share&utm_medium=app&utm_campaign=" + kind;
+        var play = "https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru&referrer=" + encodeURIComponent(ref);
+        var ios = "https://apps.apple.com/az/app/id6819821532";
+        var ua = navigator.userAgent || "";
+        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (/Android/i.test(ua)) location.replace(play);
+        else if (isIOS) location.replace(ios);
+        document.addEventListener("DOMContentLoaded", function () {
+          document.getElementById("play").href = play;
+          document.getElementById("ios").href = ios;
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Bu endirim Dropy.az tətbiqindədir</h1>
+      <p class="lead">Tətbiqi yüklə — mağazaların bütün endirimləri bir yerdə.</p>
+      <p>
+        <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru">Google Play-dən yüklə</a>
+        <a class="btn" id="ios" href="https://apps.apple.com/az/app/id6819821532">App Store-dan yüklə</a>
+      </p>
+      <p><a href="/endirimler/">Bu günün endirimlərinə bax →</a></p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["764WMB9V7W.az.endirim.aqreqatoru"],
+        "components": [
+          { "/": "/a", "comment": "shared deal, store and invite links" },
+          { "/": "/a/*" }
+        ]
+      }
+    ]
+  }
+}
