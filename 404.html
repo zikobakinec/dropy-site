@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Səhifə tapılmadı | Dropy.az</title>
+    <link rel="icon" href="/assets/icon.png" />
+    <link rel="stylesheet" href="/assets/seo.css" />
+    <script>
+      // An old campaign URL (its title, and so its slug, changed later) still
+      // ends in the deal's 8-character id: look up today's address and go there.
+      (function () {
+        var m = location.pathname.match(/^\/kampaniya\/(?:.*-)?([0-9a-f]{8})\/?$/);
+        if (!m) return;
+        fetch("/kampaniya/ids.json")
+          .then(function (r) { return r.ok ? r.json() : {}; })
+          .then(function (ids) { if (ids[m[1]] && ids[m[1]] !== location.pathname) location.replace(ids[m[1]]); })
+          .catch(function () {});
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Bu səhifə tapılmadı</h1>
+      <p class="lead">Endirim bitmiş və ya ünvan dəyişmiş ola bilər.</p>
+      <p><a class="btn" href="/endirimler/">Bu günün endirimlərinə bax →</a></p>
+      <p><a href="/magazalar/">Mağazalar</a> · <a href="/yukle/">Dropy.az tətbiqini yüklə</a></p>
+    </main>
+  </body>
+</html>

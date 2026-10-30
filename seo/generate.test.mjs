@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -53,7 +53,9 @@ test("middle way: hub, category and store pages each show their best few deals (
     "/kampaniya/mehsul-1-1/", "/kampaniya/mehsul-2-2/",
     "/magaza/bravo/", "/magaza/era/", "/magazalar/",
   ]);
-  assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri<\/h1>/);
+  assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri və kataloqu<\/h1>/);
+  assert.match(pages["/magaza/era/"], /<title>ERA endirimləri, aksiyaları və kataloqu \(1\)/);
+  assert.match(pages["/magaza/era/"], /class="intro"/);
   // Cards lead to our own campaign page; only that page links out to the store.
   assert.match(pages["/magaza/era/"], /href="\/kampaniya\/mehsul-1-1\/"/);
   assert.match(pages["/endirimler/"], /\| Dropy\.az</);
@@ -134,4 +136,22 @@ test("applyLanding fills the seo, deals and stores blocks", () => {
   assert.match(out, /deals:start -->D<!-- deals:end/);
   assert.match(out, /stores:start -->T<!-- stores:end/);
   assert.match(out, /seo:start -->S<!-- seo:end/);
+});
+
+test("a deal that left the showcase but is still live keeps its URL, says 'in the app', and is noindex", () => {
+  const entry = { path: "/kampaniya/x-1/", title: "Ütü", storeSlug: "era-seed", storeName: "ERA", catName: "Elektronika" };
+  const html = endedCampaignPage(entry, [], "2026-10-31T00:00:00Z", { inApp: true });
+  assert.match(html, /noindex, follow/);
+  assert.match(html, /Dropy\.az tətbiqində bax/);
+  assert.doesNotMatch(html, /bitib/);
+  assert.match(html, /href="\/magaza\/era\/"/);
+});
+
+test("thin deal pages (no price, almost no text) are noindex; ones with a price are not", () => {
+  const thin = { ...row(1, "era", 40), discount_label: "Endirim", description: "" };
+  const priced = { ...row(2, "era", 40), discount_label: "100 ₼ → 80 ₼" };
+  assert.equal(isThinCampaign(thin), true);
+  assert.equal(isThinCampaign(priced), false);
+  assert.match(campaignPage(thin, [], "2026-10-31T00:00:00Z"), /noindex, follow/);
+  assert.doesNotMatch(campaignPage(priced, [], "2026-10-31T00:00:00Z"), /noindex/);
 });

@@ -353,15 +353,16 @@ export function buildSite(rows, now = new Date()) {
     const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: st.name, path }]);
     pages[path] =
       head({
-        title: `${st.name} endirimləri və kampaniyaları (${items.length}) | Dropy.az`,
-        description: `${st.name}-in ${items.length} aktiv endirimi${best ? `, ${best}%-dək` : ""}. Hər endirim ${st.name}-in öz saytına aparır, hər gün yenilənir.`,
+        title: `${st.name} endirimləri, aksiyaları və kataloqu (${items.length}) | Dropy.az`,
+        description: `${st.name} endirim kataloqu: bu həftənin ${items.length} aktiv aksiyası${best ? `, ${best}%-dək endirim` : ""}. Siyahı hər gün yenilənir.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${st.name} endirimləri`, items)}\n`,
       }) +
       crumbs.html +
-      `      <h1>${esc(st.name)} endirimləri</h1>
+      `      <h1>${esc(st.name)} endirimləri və kataloqu</h1>
       <p class="lead"><b>${items.length}</b> aktiv endirim və kampaniya${best ? `, ${best}%-dək` : ""}.</p>
 ` +
+      storeIntro(st.name) +
       chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length }))) +
       appBanner() +
       grid(FULL_CATALOG ? items : items.slice(0, PAGE_TOP), { showStore: false }) +
@@ -399,18 +400,27 @@ export function buildSite(rows, now = new Date()) {
   return { pages, categories, stores, campaigns: shown, updated };
 }
 
+// A few lines of real text: store pages are what people find on Google
+// ("rahat market endirim jurnalı", "era electronics"), and a page that is only
+// a grid of cards reads as thin (Search Console, 2026-10-31).
+export function storeIntro(name) {
+  const n = esc(name);
+  return `      <p class="intro">Bu səhifədə ${n}-in bu həftəki endirimləri, aksiyaları və kampaniyaları bir yerə toplanıb — ayrıca endirim jurnalı və ya kataloq axtarmağa ehtiyac yoxdur. Siyahı hər gün yenilənir, bitmiş aksiyalar avtomatik çıxarılır. ${n}-in bütün endirimlərini görmək və yeni aksiya çıxanda bildiriş almaq üçün Dropy.az tətbiqində mağazanı izlə.</p>
+`;
+}
+
 function emptyStorePage(slug, name, updated) {
   const path = `/magaza/${urlSlug(slug)}/`;
   const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name, path }]);
   return (
     head({
-      title: `${name} endirimləri və kampaniyaları | Dropy.az`,
+      title: `${name} endirimləri, aksiyaları və kataloqu | Dropy.az`,
       description: `${name}-in hazırda aktiv endirimi yoxdur. Yeni endirim çıxanda Dropy tətbiqi bildiriş göndərir.`,
       path,
       extra: `    ${crumbs.ld}\n`,
     }) +
     crumbs.html +
-    `      <h1>${esc(name)} endirimləri</h1>
+    `      <h1>${esc(name)} endirimləri və kataloqu</h1>
       <p class="lead">Hazırda ${esc(name)}-in aktiv endirimi yoxdur. Mağazanı tətbiqdə izlə — yeni endirim çıxanda bildiriş alacaqsan.</p>
 ` +
     appBanner() +
@@ -426,6 +436,15 @@ function cleanDescription(text, title) {
   const t = String(text ?? "").replace(/#\S+/g, "").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
   if (!t || t === title) return "";
   return t.length > 700 ? `${t.slice(0, 700).replace(/\s+\S*$/, "")}…` : t;
+}
+
+// A deal page with no price pair and almost no text is what Google files under
+// "crawled, not indexed" and counts against the site (Search Console,
+// 2026-10-31: 171 such pages). Those stay reachable for visitors but carry
+// noindex and stay out of the sitemap.
+export function isThinCampaign(c) {
+  if (pricePair(c.discount_label) ?? pricePair(c.description)) return false;
+  return cleanDescription(c.description, c.title).length < 80;
 }
 
 export function campaignPage(c, similar, updated) {
@@ -470,7 +489,8 @@ export function campaignPage(c, similar, updated) {
       description: `${store.name}: ${c.title}${prices ? ` — ${prices.oldPrice} ₼ əvəzinə ${prices.newPrice} ₼` : ` — ${b}`}.${realEnd ? ` Son tarix: ${azDate(c.end_date)}.` : ""} Endirimə mağazanın öz saytında bax.`,
       path,
       image: img,
-      extra: `    ${crumbs.ld}
+      extra: `${isThinCampaign(c) ? `    <meta name="robots" content="noindex, follow" />
+` : ""}    ${crumbs.ld}
 ${productLd ? `    ${productLd}
 ` : ""}`,
     }) +
@@ -496,7 +516,12 @@ ${grid(similar)}` : "") +
   );
 }
 
-export function endedCampaignPage(entry, similar, updated) {
+// `inApp`: the deal is still running but left the web showcase (FULL_CATALOG
+// off), so the page says where to find it instead of "bitib". Either way the
+// URL keeps answering (noindex, follow) for ENDED_KEEP_DAYS instead of turning
+// into a 404 for a page Google already indexed (2026-10-31: the showcase switch
+// on 10-29 had dropped ~1,700 such pages).
+export function endedCampaignPage(entry, similar, updated, { inApp = false } = {}) {
   const crumbs = breadcrumbs([
     { name: "Dropy.az", path: "/" },
     { name: "Endirimlər", path: "/endirimler/" },
@@ -504,8 +529,10 @@ export function endedCampaignPage(entry, similar, updated) {
   ]);
   return (
     head({
-      title: `${entry.title} — endirim bitib | ${entry.storeName} | Dropy.az`,
-      description: `${entry.storeName}-in bu endirimi artıq bitib. ${entry.catName ?? ""} üzrə aktiv endirimlərə Dropy-də bax.`,
+      title: inApp ? `${entry.title} | ${entry.storeName} | Dropy.az` : `${entry.title} — endirim bitib | ${entry.storeName} | Dropy.az`,
+      description: inApp
+        ? `${entry.storeName}-in bu endirimi Dropy.az tətbiqində. ${entry.catName ?? ""} üzrə digər endirimlərə də bax.`
+        : `${entry.storeName}-in bu endirimi artıq bitib. ${entry.catName ?? ""} üzrə aktiv endirimlərə Dropy-də bax.`,
       path: entry.path,
       extra: `    <meta name="robots" content="noindex, follow" />
     ${crumbs.ld}
@@ -513,7 +540,7 @@ export function endedCampaignPage(entry, similar, updated) {
     }) +
     crumbs.html +
     `      <h1>${esc(entry.title)}</h1>
-      <p class="lead">Bu endirim artıq bitib. <a href="/magaza/${esc(urlSlug(entry.storeSlug))}/">${esc(entry.storeName)}-in digər endirimlərinə</a> və aşağıdakı oxşar təkliflərə bax.</p>
+      <p class="lead">${inApp ? "Bu endirimə Dropy.az tətbiqində bax." : "Bu endirim artıq bitib."} <a href="/magaza/${esc(urlSlug(entry.storeSlug))}/">${esc(entry.storeName)}-in digər endirimlərinə</a> və aşağıdakı oxşar təkliflərə bax.</p>
 ` +
     appBanner() +
     (similar.length ? `      <h2>Oxşar aktiv endirimlər</h2>
@@ -667,24 +694,27 @@ async function main() {
     };
   }
   const activeIds = new Set(campaigns.map((c) => c.id));
+  const liveInFeed = new Set(rows.map((r) => r.id));
   for (const [id, entry] of Object.entries(seen)) {
     if (activeIds.has(id)) continue;
-    // Showcase mode: a deal that left the showcase isn't kept as an ended page.
-    if (!FULL_CATALOG) {
-      delete seen[id];
-      continue;
-    }
     if (nowMs - Date.parse(entry.lastSeen) > ENDED_KEEP_DAYS * 24 * 3600_000) {
       delete seen[id];
       continue;
     }
     const similar = spreadByStore(campaigns.filter((o) => o.categories.slug === entry.catSlug)).slice(0, 8);
-    write(entry.path, endedCampaignPage(entry, similar, updated));
+    write(entry.path, endedCampaignPage(entry, similar, updated, { inApp: liveInFeed.has(id) }));
   }
   writeFileSync(campaignFile, JSON.stringify(seen, null, 1) + "\n");
+  // A deal's title can change after Google indexed it, which changes its slug
+  // (…-coox-… → …-cooox-…) while the trailing id stays. /404.html uses this map
+  // to send such old URLs to the current page (Search Console, 2026-10-31).
+  const idMap = {};
+  for (const c of campaigns) idMap[c.id.slice(0, 8)] = campaignPath(c);
+  for (const [id, entry] of Object.entries(seen)) if (!idMap[id.slice(0, 8)]) idMap[id.slice(0, 8)] = entry.path;
+  writeFileSync(join(ROOT, "kampaniya", "ids.json"), JSON.stringify(idMap) + "\n");
 
   const day = updated.slice(0, 10);
-  const urls = ["/", "/destek/", "/endirimler/", "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.map((c) => campaignPath(c))];
+  const urls = ["/", "/destek/", "/endirimler/", "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c))];
   writeFileSync(
     join(ROOT, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
