@@ -10,6 +10,7 @@
 //   /magazalar/                  every store with a page
 //   /magaza/<slug>/              one page per store
 //   /kampaniya/<ad>-<id>/        one page per campaign (kept 30 days after it ends)
+//   /endirimler/11-11/, /endirimler/black-friday/   shopping-event pages (EVENTS)
 //   /sitemap.xml, /robots.txt
 // and a marked block of internal links + structured data in /index.html.
 //
@@ -28,7 +29,7 @@ const PLAY_URL = "https://play.google.com/store/apps/details?id=az.endirim.aqreq
 // The app is Azerbaijan-only on the App Store: without /az/ the link shows "not found" elsewhere.
 const APP_STORE_URL = "https://apps.apple.com/az/app/id6819821532";
 const FEED_SELECT =
-  "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,stores(slug,name,logo_url),categories(slug,name_az)";
+  "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,event_tag,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
 // Until the site carries its own ads (AdSense), it shows a taste of each shelf,
 // not the whole catalog: a visitor who sees every deal on the web has no reason
@@ -40,6 +41,53 @@ const FULL_CATALOG = false;
 const SHOWCASE_LIMIT = 20;
 const PAGE_TOP = 5;
 const ENDED_KEEP_DAYS = 30;
+
+// Shopping-event pages (11.11 plan, 2026-11-01). Each page always exists, so
+// Google can index it before the day; it fills itself with the campaigns the
+// ingestion tagged campaigns.event_tag = tag (migration 0088). `day` is the
+// event's date for a year; the hub links the page from `from` days before
+// until `to` days after it.
+export const EVENTS = [
+  {
+    tag: "11-11",
+    slug: "11-11",
+    name: "11.11",
+    day: (y) => new Date(Date.UTC(y, 10, 11)),
+    from: 10,
+    to: 1,
+    about:
+      "11 noyabr (11.11) ilin ən böyük onlayn alış-veriş günlərindən biridir. Bu tarixdə mağazalar bir günlük və ya bir neçə günlük xüsusi endirimlər, promo kodlar və aksiyalar keçirir: elektronika, geyim, kosmetika, ev əşyaları və daha çox.",
+  },
+  {
+    tag: "black-friday",
+    slug: "black-friday",
+    name: "Black Friday",
+    // The Friday after the fourth Thursday of November.
+    day: (y) => {
+      const first = new Date(Date.UTC(y, 10, 1)).getUTCDay();
+      return new Date(Date.UTC(y, 10, 1 + ((4 - first + 7) % 7) + 21 + 1));
+    },
+    from: 12,
+    to: 3,
+    about:
+      "Black Friday (Qara Cümə) noyabrın son cüməsidir və ilin ən böyük endirim mövsümünü açır. Mağazalar bu günlərdə elektronika, geyim, məişət texnikası və digər məhsullarda ilin ən böyük endirimlərini edir; bəzi aksiyalar bütün həftə davam edir.",
+  },
+];
+
+/** "before" until the event day ends (Baku time), "after" from then on. */
+export function eventPhase(ev, now = new Date()) {
+  const baku = new Date(now.getTime() + 4 * 3600_000);
+  const end = ev.day(baku.getUTCFullYear()).getTime() + 24 * 3600_000 + (ev.to - 1) * 24 * 3600_000;
+  return baku.getTime() < end ? "before" : "after";
+}
+
+/** True while the hub should point at the event page. */
+export function eventInSeason(ev, now = new Date()) {
+  const baku = new Date(now.getTime() + 4 * 3600_000);
+  const day = ev.day(baku.getUTCFullYear()).getTime();
+  const t = baku.getTime();
+  return t >= day - ev.from * 24 * 3600_000 && t < day + (ev.to + 1) * 24 * 3600_000;
+}
 
 const AZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
 
@@ -285,6 +333,9 @@ export function buildSite(rows, now = new Date()) {
   const shownById = new Map(hubDeals.map((c) => [c.id, c]));
   for (const st of stores) for (const c of best(st.items)) shownById.set(c.id, c);
   for (const cat of categories) for (const c of spreadByStore(cat.items).slice(0, PAGE_TOP)) shownById.set(c.id, c);
+  const eventItems = new Map(EVENTS.map((ev) => [ev.tag, spreadByStore(campaigns.filter((c) => c.event_tag === ev.tag))]));
+  for (const items of eventItems.values()) for (const c of items.slice(0, SHOWCASE_LIMIT)) shownById.set(c.id, c);
+  const seasonal = EVENTS.filter((ev) => eventInSeason(ev, now));
   const shown = FULL_CATALOG ? campaigns : [...shownById.values()];
   const inApp = (total, listed) =>
     total > listed
@@ -307,6 +358,9 @@ export function buildSite(rows, now = new Date()) {
       `      <h1>Bu günün endirimləri və kampaniyaları</h1>
       <p class="lead">${stores.length} mağazanın öz saytından toplanmış <b>${campaigns.length}</b> aktiv endirim. Hər endirim mağazanın öz səhifəsinə aparır, hər gün yenilənir.</p>
 ` +
+      (seasonal.length
+        ? chips(seasonal.map((ev) => ({ path: `/endirimler/${ev.slug}/`, name: `${ev.name} endirimləri`, count: eventItems.get(ev.tag).length || "yeni" })))
+        : "") +
       chips(catLinks) +
       appBanner() +
       `      <h2>${FULL_CATALOG ? "Ən çox endirim olanlar" : "Seçilmiş endirimlər — hamısı Dropy.az tətbiqində"}</h2>\n` +
@@ -390,6 +444,11 @@ export function buildSite(rows, now = new Date()) {
       foot(updated);
   }
 
+  // Shopping events
+  for (const ev of EVENTS) {
+    pages[`/endirimler/${ev.slug}/`] = eventPage(ev, eventItems.get(ev.tag), hubDeals, updated, now);
+  }
+
   // Campaigns
   for (const c of shown) {
     const pool = FULL_CATALOG ? byCategory.get(c.categories.slug).items : shown;
@@ -398,6 +457,52 @@ export function buildSite(rows, now = new Date()) {
   }
 
   return { pages, categories, stores, campaigns: shown, updated };
+}
+
+export function eventPage(ev, all, fallback, updated, now = new Date()) {
+  const path = `/endirimler/${ev.slug}/`;
+  const year = new Date(now.getTime() + 4 * 3600_000).getUTCFullYear();
+  const items = FULL_CATALOG ? all : all.slice(0, SHOWCASE_LIMIT);
+  const eventStores = [...new Map(all.map((c) => [c.stores.slug, c.stores])).values()];
+  const dayText = azDate(ev.day(year).toISOString()).replace(/ \d{4}$/, "");
+  const after = eventPhase(ev, now) === "after";
+  const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirimlər", path: "/endirimler/" }, { name: `${ev.name} endirimləri`, path }]);
+  const lead = all.length
+    ? `      <p class="lead">${eventStores.length} mağazada <b>${all.length}</b> ${esc(ev.name)} endirimi və kampaniyası. Siyahı hər gün yenilənir.</p>
+`
+    : after
+      ? `      <p class="lead">Bu ilin ${esc(ev.name)} kampaniyaları bitib. Aşağıda bu günün aktiv endirimləri var; növbəti böyük endirimlərdən xəbər tutmaq üçün Dropy.az tətbiqini yüklə.</p>
+`
+      : `      <p class="lead">${esc(ev.name)} (${esc(dayText)}) kampaniyaları mağazalar elan etdikcə bu səhifəyə əlavə olunur. Sevdiyin mağazaları Dropy.az tətbiqində izlə — yeni endirim çıxanda bildiriş alacaqsan.</p>
+`;
+  return (
+    head({
+      title: `${ev.name} endirimləri ${year} — kampaniyalar və aksiyalar | Dropy.az`,
+      description: all.length
+        ? `${ev.name} ${year}: ${eventStores.length} mağazanın ${all.length} endirimi və kampaniyası bir yerdə. ${eventStores.slice(0, 5).map((s) => s.name).join(", ")}${eventStores.length > 5 ? " və digərləri" : ""}.`
+        : `${ev.name} ${year} endirimləri, kampaniyaları və aksiyaları bir yerdə: mağazalar elan etdikcə bu səhifəyə əlavə olunur, hər gün yenilənir.`,
+      path,
+      extra: `    ${crumbs.ld}
+${items.length ? `    ${itemListLd(`${ev.name} endirimləri`, items)}
+` : ""}`,
+    }) +
+    crumbs.html +
+    `      <h1>${esc(ev.name)} endirimləri ${year}</h1>
+` +
+    lead +
+    `      <p class="intro">${esc(ev.about)} Dropy.az mağazaların öz saytlarındakı ${esc(ev.name)} kampaniyalarını bir səhifəyə toplayır, ayrı-ayrı saytları gəzməyə ehtiyac qalmır.</p>
+` +
+    (all.length ? chips(eventStores.map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: s.name, count: all.filter((c) => c.stores.slug === s.slug).length }))) : "") +
+    appBanner() +
+    (items.length
+      ? grid(items) + (FULL_CATALOG ? "" : all.length > items.length ? `      <p class="lead"><b>Qalan ${all.length - items.length} ${esc(ev.name)} endirimi Dropy.az tətbiqində.</b></p>
+` : "")
+      : `      <h2>Bu günün seçilmiş endirimləri</h2>
+` + grid(fallback.slice(0, 8))) +
+    `      <p><a href="/endirimler/">Bu günün bütün endirimləri →</a></p>
+` +
+    foot(updated)
+  );
 }
 
 // A few lines of real text: store pages are what people find on Google
@@ -714,7 +819,7 @@ async function main() {
   writeFileSync(join(ROOT, "kampaniya", "ids.json"), JSON.stringify(idMap) + "\n");
 
   const day = updated.slice(0, 10);
-  const urls = ["/", "/destek/", "/endirimler/", "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c))];
+  const urls = ["/", "/destek/", "/endirimler/", ...EVENTS.map((ev) => `/endirimler/${ev.slug}/`), "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c))];
   writeFileSync(
     join(ROOT, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

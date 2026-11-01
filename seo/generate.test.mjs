@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -49,7 +49,7 @@ test("landing block is inserted once before the footer and replaced on later run
 test("middle way: hub, category and store pages each show their best few deals (2026-10-29)", () => {
   const { pages } = buildSite([row(1, "era", 40), row(2, "bravo", 20, "market")], new Date("2026-10-16T08:00:00Z"));
   assert.deepEqual(Object.keys(pages).sort(), [
-    "/endirimler/", "/endirimler/elektronika/", "/endirimler/market/",
+    "/endirimler/", "/endirimler/11-11/", "/endirimler/black-friday/", "/endirimler/elektronika/", "/endirimler/market/",
     "/kampaniya/mehsul-1-1/", "/kampaniya/mehsul-2-2/",
     "/magaza/bravo/", "/magaza/era/", "/magazalar/",
   ]);
@@ -154,4 +154,31 @@ test("thin deal pages (no price, almost no text) are noindex; ones with a price 
   assert.equal(isThinCampaign(priced), false);
   assert.match(campaignPage(thin, [], "2026-10-31T00:00:00Z"), /noindex, follow/);
   assert.doesNotMatch(campaignPage(priced, [], "2026-10-31T00:00:00Z"), /noindex/);
+});
+
+test("event pages always exist, fill with tagged deals and get linked from the hub in season (11.11, 2026-11-01)", () => {
+  const rows = [row(1, "era", 40), row(2, "bravo", 30), { ...row(3, "kontakt", 25), event_tag: "11-11" }, { ...row(4, "era", 50), event_tag: "11-11" }];
+  const nov5 = new Date("2026-11-05T10:00:00Z");
+  const { pages } = buildSite(rows, nov5);
+  const p = pages["/endirimler/11-11/"];
+  assert.ok(p.includes("<h1>11.11 endirimləri 2026</h1>"));
+  assert.ok(p.includes("Məhsul 3") && p.includes("Məhsul 4") && !p.includes("Məhsul 1<"));
+  assert.ok(pages[campaignPath(rows[2])], "tagged deals get their own campaign page");
+  assert.ok(pages["/endirimler/"].includes('href="/endirimler/11-11/"'));
+  assert.ok(!pages["/endirimler/"].includes('href="/endirimler/black-friday/"'));
+  const bf = pages["/endirimler/black-friday/"];
+  assert.ok(bf.includes("mağazalar elan etdikcə") && bf.includes("Bu günün seçilmiş endirimləri"));
+  assert.ok(!bf.includes("Bakı"));
+});
+
+test("event dates and phases: Black Friday 2026 is 27 November; 11.11 ends with the day in Baku", () => {
+  const bf = EVENTS.find((e) => e.tag === "black-friday");
+  assert.equal(bf.day(2026).toISOString().slice(0, 10), "2026-11-27");
+  assert.equal(bf.day(2027).toISOString().slice(0, 10), "2027-11-26");
+  const ev = EVENTS.find((e) => e.tag === "11-11");
+  assert.equal(eventPhase(ev, new Date("2026-11-11T19:00:00Z")), "before");
+  assert.equal(eventPhase(ev, new Date("2026-11-11T20:30:00Z")), "after");
+  assert.equal(eventInSeason(ev, new Date("2026-10-30T12:00:00Z")), false);
+  assert.equal(eventInSeason(ev, new Date("2026-11-01T12:00:00Z")), true);
+  assert.equal(eventInSeason(ev, new Date("2026-11-13T12:00:00Z")), false);
 });
