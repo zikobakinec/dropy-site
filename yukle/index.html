@@ -16,13 +16,24 @@
         var PLAY = "https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru";
         var APP_STORE = "https://apps.apple.com/app/id6819821532";
         var query = location.search.replace(/^\?/, "");
-        var play = query ? PLAY + "&" + query : PLAY;
+        // Google Play reads campaign data only from the `referrer` parameter
+        // (URL-encoded utm_* string), not from loose utm_* params (2026-11-04).
+        var ref = query ? "&referrer=" + encodeURIComponent(query) : "";
+        var play = PLAY + ref;
         var ua = navigator.userAgent || "";
         // iPadOS reports itself as a Mac; touch support tells them apart.
         var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        // Instagram/Facebook in-app browsers open https store links as a web
+        // page inside the app; the store schemes open the store app itself.
+        var inApp = /Instagram|FBAN|FBAV|FB_IAB/i.test(ua);
         window.__dropyLinks = { play: play, appStore: APP_STORE };
-        if (/Android/i.test(ua)) location.replace(play);
-        else if (ios) location.replace(APP_STORE);
+        function go(appUrl, webUrl) {
+          location.href = appUrl;
+          // Store app missing or scheme refused: fall back to the web store.
+          setTimeout(function () { if (!document.hidden) location.replace(webUrl); }, 1500);
+        }
+        if (/Android/i.test(ua)) go("market://details?id=az.endirim.aqreqatoru" + ref, play);
+        else if (ios) inApp ? go(APP_STORE.replace(/^https:/, "itms-apps:"), APP_STORE) : location.replace(APP_STORE);
       })();
     </script>
     <style>
