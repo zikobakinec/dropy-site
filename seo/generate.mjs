@@ -91,6 +91,21 @@ export function eventInSeason(ev, now = new Date()) {
 
 const AZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
 
+/** "Noyabr 2026" (Baku calendar): titles carry the current month (SEO, 2026-11-10). */
+export function monthYear(now = new Date()) {
+  const d = new Date(now.getTime() + 4 * 3600_000);
+  const m = AZ_MONTHS[d.getUTCMonth()];
+  return `${m[0].toLocaleUpperCase("az")}${m.slice(1)} ${d.getUTCFullYear()}`;
+}
+
+// A store × category page exists only with this many live deals, so it is
+// never a near-empty page (programmatic SEO, 2026-11-10).
+export const STORE_CAT_MIN = 4;
+
+// Links to the strongest pages, set by buildSite() and shown in every footer
+// and on the landing: internal links from the home page (position 2) lift them.
+let popularLinks = [];
+
 export function esc(s) {
   return String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -243,7 +258,7 @@ function foot(updatedIso) {
     <footer class="foot">
       <div class="wrap">
         <p>Dropy mağazaların öz saytlarındakı aktual endirimləri toplayır. Endirimin şərtləri və qiyməti mağazanın öz səhifəsindədir. Yenilənib: ${esc(azDate(updatedIso))}.</p>
-        <p><a href="/">Ana səhifə</a> · <a href="/endirimler/">Endirimlər</a> · <a href="/magazalar/">Mağazalar</a> · <a href="/destek/">Dəstək</a> · <a href="https://legal.dropy.az">Məxfilik</a></p>
+${popularLinks.length ? `        <p class="popular">${popularLinks.map((l) => `<a href="${l.path}">${esc(l.name)}</a>`).join(" · ")}</p>\n` : ""}        <p><a href="/">Ana səhifə</a> · <a href="/endirimler/">Endirimlər</a> · <a href="/magazalar/">Mağazalar</a> · <a href="/destek/">Dəstək</a> · <a href="https://legal.dropy.az">Məxfilik</a></p>
       </div>
     </footer>
   </body>
@@ -336,6 +351,32 @@ export function buildSite(rows, now = new Date()) {
   const eventItems = new Map(EVENTS.map((ev) => [ev.tag, spreadByStore(campaigns.filter((c) => c.event_tag === ev.tag))]));
   for (const items of eventItems.values()) for (const c of items.slice(0, SHOWCASE_LIMIT)) shownById.set(c.id, c);
   const seasonal = EVENTS.filter((ev) => eventInSeason(ev, now));
+  const month = monthYear(now);
+
+  // Store × category ("Kontakt Home telefon endirimləri"): long-tail searches
+  // with buyers ready to buy and almost no competition.
+  const storeCats = [];
+  for (const st of stores) {
+    const groups = new Map();
+    for (const c of st.items) {
+      if (!groups.has(c.categories.slug)) groups.set(c.categories.slug, { cat: c.categories, items: [] });
+      groups.get(c.categories.slug).items.push(c);
+    }
+    for (const g of groups.values()) {
+      // All of a store's deals in one category = the store page itself; a copy would be duplicate content.
+      if (g.items.length < STORE_CAT_MIN || g.items.length === st.items.length) continue;
+      storeCats.push({ store: st, cat: g.cat, items: [...g.items].sort((a, b) => percentOf(b) - percentOf(a)), path: `/magaza/${urlSlug(st.slug)}/${g.cat.slug}/` });
+    }
+  }
+  for (const sc of storeCats) for (const c of sc.items.slice(0, PAGE_TOP)) shownById.set(c.id, c);
+  const storeCatPath = new Map(storeCats.map((sc) => [`${sc.store.slug}|${sc.cat.slug}`, sc.path]));
+
+  popularLinks = [
+    ...seasonal.map((ev) => ({ path: `/endirimler/${ev.slug}/`, name: `${ev.name} endirimləri` })),
+    ...[...stores].sort((a, b) => b.items.length - a.items.length).slice(0, 8).map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: `${s.name} endirimləri` })),
+    ...categories.slice(0, 5).map((c) => ({ path: `/endirimler/${c.slug}/`, name: `${c.name} endirimləri` })),
+  ];
+
   const shown = FULL_CATALOG ? campaigns : [...shownById.values()];
   const inApp = (total, listed) =>
     total > listed
@@ -378,9 +419,10 @@ export function buildSite(rows, now = new Date()) {
     const catStores = [...new Map(all.map((c) => [c.stores.slug, c.stores])).values()];
     const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirimlər", path: "/endirimler/" }, { name: cat.name, path }]);
     const storeNames = catStores.slice(0, 6).map((s) => s.name).join(", ");
+    const catBest = all.reduce((m, c) => Math.max(m, percentOf(c)), 0);
     pages[path] =
       head({
-        title: `${cat.name} endirimləri — ${all.length} aktiv kampaniya | Dropy.az`,
+        title: `${cat.name} endirimləri (${month}) — ${all.length} aktiv${catBest ? `, ${catBest}%-dək` : ""} | Dropy.az`,
         description: `${cat.name} üzrə ${all.length} aktiv endirim: ${storeNames}${catStores.length > 6 ? " və digərləri" : ""}. Real qiymətlər, mağazanın öz saytından.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${cat.name} endirimləri`, items)}\n`,
@@ -407,8 +449,8 @@ export function buildSite(rows, now = new Date()) {
     const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: st.name, path }]);
     pages[path] =
       head({
-        title: `${st.name} endirimləri, aksiyaları və kataloqu (${items.length}) | Dropy.az`,
-        description: `${st.name} endirim kataloqu: bu həftənin ${items.length} aktiv aksiyası${best ? `, ${best}%-dək endirim` : ""}. Siyahı hər gün yenilənir.`,
+        title: `${st.name} endirimləri və kataloqu (${month}) — ${items.length} aktiv${best ? `, ${best}%-dək` : ""} | Dropy.az`,
+        description: `${st.name} endirim jurnalı və kataloqu, ${month}: bu həftənin ${items.length} aktiv aksiyası${best ? `, ${best}%-dək endirim` : ""}. Siyahı hər gün yenilənir.`,
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${st.name} endirimləri`, items)}\n`,
       }) +
@@ -417,11 +459,22 @@ export function buildSite(rows, now = new Date()) {
       <p class="lead"><b>${items.length}</b> aktiv endirim və kampaniya${best ? `, ${best}%-dək` : ""}.</p>
 ` +
       storeIntro(st.name) +
-      chips(cats.map((c) => ({ path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length }))) +
+      chips(cats.map((c) => {
+        const own = items.filter((o) => o.categories.slug === c.slug).length;
+        const sub = storeCatPath.get(`${st.slug}|${c.slug}`);
+        return sub
+          ? { path: sub, name: `${st.name} ${(c.name_az ?? c.slug).toLocaleLowerCase("az")}`, count: own }
+          : { path: `/endirimler/${c.slug}/`, name: c.name_az ?? c.slug, count: byCategory.get(c.slug).items.length };
+      })) +
       appBanner() +
       grid(FULL_CATALOG ? items : items.slice(0, PAGE_TOP), { showStore: false }) +
       (FULL_CATALOG ? "" : inApp(items.length, Math.min(items.length, PAGE_TOP))) +
       foot(updated);
+  }
+
+  // Store × category
+  for (const sc of storeCats) {
+    pages[sc.path] = storeCatPage(sc, month, updated, inApp);
   }
 
   // Store index
@@ -456,7 +509,39 @@ export function buildSite(rows, now = new Date()) {
     pages[campaignPath(c)] = campaignPage(c, similar, updated);
   }
 
-  return { pages, categories, stores, campaigns: shown, updated };
+  return { pages, categories, stores, storeCats, campaigns: shown, updated };
+}
+
+export function storeCatPage({ store, cat, items, path }, month, updated, inApp) {
+  const catName = cat.name_az ?? cat.slug;
+  const lower = catName.toLocaleLowerCase("az");
+  const best = items.reduce((m, c) => Math.max(m, percentOf(c)), 0);
+  const listed = FULL_CATALOG ? items : items.slice(0, PAGE_TOP);
+  const crumbs = breadcrumbs([
+    { name: "Dropy.az", path: "/" },
+    { name: "Mağazalar", path: "/magazalar/" },
+    { name: store.name, path: `/magaza/${urlSlug(store.slug)}/` },
+    { name: catName, path },
+  ]);
+  return (
+    head({
+      title: `${store.name} ${lower} endirimləri (${month}) — ${items.length} aktiv${best ? `, ${best}%-dək` : ""} | Dropy.az`,
+      description: `${store.name} — ${lower} üzrə ${items.length} aktiv endirim${best ? `, ${best}%-dək` : ""}: ${items.slice(0, 3).map((c) => c.title).join(", ")}. Siyahı hər gün yenilənir.`,
+      path,
+      extra: `    ${crumbs.ld}\n    ${itemListLd(`${store.name} ${lower} endirimləri`, items)}\n`,
+    }) +
+    crumbs.html +
+    `      <h1>${esc(store.name)} ${esc(lower)} endirimləri</h1>
+      <p class="lead"><b>${items.length}</b> aktiv ${esc(lower)} endirimi${best ? `, ${best}%-dək` : ""}.</p>
+      <p class="intro">Bu səhifədə ${esc(store.name)}-in ${esc(lower)} kateqoriyasındakı bu həftəki endirim və aksiyaları toplanıb. Siyahı hər gün mağazanın öz saytından yenilənir, bitmiş aksiyalar avtomatik çıxarılır.</p>
+` +
+    appBanner() +
+    grid(listed, { showStore: false }) +
+    inApp(items.length, listed.length) +
+    `      <p><a href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}-in bütün endirimləri →</a> · <a href="/endirimler/${esc(cat.slug)}/">Bütün ${esc(lower)} endirimləri →</a></p>
+` +
+    foot(updated)
+  );
 }
 
 export function eventPage(ev, all, fallback, updated, now = new Date()) {
@@ -680,6 +765,8 @@ export function landingBlock(categories, stores, _total) {
         <p style="margin:0 0 .8rem;color:#5c6479;line-height:1.6">Dropy.az Azərbaycandakı mağazaların endirim, kampaniya və aksiyalarını bir yerdə toplayır: elektronika, məişət texnikası, geyim, market, kosmetika, uşaq məhsulları və daha çox. Endirimlər hər gün mağazaların öz saytlarından yenilənir, hamısı ödənişsiz Dropy.az tətbiqində.</p>
         <p style="margin:0 0 1rem;color:#5c6479"><a href="/endirimler/" style="color:#f2643d;font-weight:700">Hamısına bax →</a> · <a href="/magazalar/" style="color:#f2643d;font-weight:700">Mağazalar</a></p>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">${links.replace(/<a /g, '<a style="padding:.45rem .8rem;border:1px solid #e8dfd1;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem" ')}</div>
+${popularLinks.length ? `        <h2 style="font-family:'Fraunces Variable',Fraunces,Georgia,serif;font-size:1.3rem;margin:1.6rem 0 .6rem;color:#14213d">Ən çox baxılan endirimlər</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem">${popularLinks.map((l) => `<a href="${l.path}" style="padding:.45rem .8rem;border:1px solid #f2643d;border-radius:999px;background:#fff;color:#14213d;text-decoration:none;font-size:.85rem">${esc(l.name)}</a>`).join("")}</div>` : ""}
         ${ld}
       </section>
       ${END}`;
@@ -754,6 +841,38 @@ export function applyLanding(html, { seo, deals, stores }) {
   return out;
 }
 
+export function urlsetXml(paths, day) {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths
+    .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${day}</lastmod><changefreq>daily</changefreq></url>`)
+    .join("\n")}\n</urlset>\n`;
+}
+
+export function sitemapIndexXml(files, day) {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${files
+    .map((f) => `  <sitemap><loc>${SITE}/${f}</loc><lastmod>${day}</lastmod></sitemap>`)
+    .join("\n")}\n</sitemapindex>\n`;
+}
+
+function emptyStoreCatPage(path, e, updated) {
+  const lower = String(e.cat).toLocaleLowerCase("az");
+  const storePath = `/magaza/${urlSlug(e.storeSlug)}/`;
+  const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: e.store, path: storePath }, { name: e.cat, path }]);
+  return (
+    head({
+      title: `${e.store} ${lower} endirimləri | Dropy.az`,
+      description: `${e.store} — ${lower} üzrə hazırda az aktiv endirim var. Mağazanın bütün endirimlərinə Dropy-də bax.`,
+      path,
+      extra: `    <meta name="robots" content="noindex, follow" />\n    ${crumbs.ld}\n`,
+    }) +
+    crumbs.html +
+    `      <h1>${esc(e.store)} ${esc(lower)} endirimləri</h1>
+      <p class="lead">Hazırda bu kateqoriyada az endirim var. <a href="${storePath}">${esc(e.store)}-in bütün endirimlərinə</a> və ya <a href="/endirimler/${esc(e.catSlug)}/">bütün ${esc(lower)} endirimlərinə</a> bax.</p>
+` +
+    appBanner() +
+    foot(updated)
+  );
+}
+
 // ---------- main ----------
 
 async function main() {
@@ -762,7 +881,7 @@ async function main() {
   const rows = await res.json();
   if (!Array.isArray(rows) || rows.length < 50) throw new Error(`feed looks wrong (${Array.isArray(rows) ? rows.length : typeof rows} rows) — refusing to overwrite the site`);
 
-  const { pages, categories, stores, campaigns, updated } = buildSite(rows);
+  const { pages, categories, stores, storeCats, campaigns, updated } = buildSite(rows);
 
   // Regenerated wholesale, so a category that disappears doesn't linger.
   rmSync(join(ROOT, "endirimler"), { recursive: true, force: true });
@@ -780,6 +899,17 @@ async function main() {
     if (!active.has(slug)) write(`/magaza/${urlSlug(slug)}/`, emptyStorePage(slug, name, updated));
   }
   writeFileSync(registryFile, JSON.stringify(Object.fromEntries(Object.entries(registry).sort()), null, 2) + "\n");
+
+  // A store × category page that drops under STORE_CAT_MIN deals keeps its URL
+  // (noindex, follow) and points to the store page instead of turning into a 404.
+  const scFile = join(ROOT, "seo", "store-cats.json");
+  const scRegistry = existsSync(scFile) ? JSON.parse(readFileSync(scFile, "utf8")) : {};
+  for (const sc of storeCats) scRegistry[sc.path] = { store: sc.store.name, storeSlug: sc.store.slug, cat: sc.cat.name_az ?? sc.cat.slug, catSlug: sc.cat.slug };
+  const liveSc = new Set(storeCats.map((sc) => sc.path));
+  for (const [path, e] of Object.entries(scRegistry)) {
+    if (!liveSc.has(path)) write(path, emptyStoreCatPage(path, e, updated));
+  }
+  writeFileSync(scFile, JSON.stringify(Object.fromEntries(Object.entries(scRegistry).sort()), null, 2) + "\n");
 
   // Ended campaigns keep their page for ENDED_KEEP_DAYS ("bitib" + live
   // alternatives, noindex) so a visitor from Google doesn't hit a 404 the
@@ -818,14 +948,19 @@ async function main() {
   for (const [id, entry] of Object.entries(seen)) if (!idMap[id.slice(0, 8)]) idMap[id.slice(0, 8)] = entry.path;
   writeFileSync(join(ROOT, "kampaniya", "ids.json"), JSON.stringify(idMap) + "\n");
 
+  // Three sitemaps under one index (2026-11-10): stores and event pages change
+  // daily and matter most, so Google sees them separately from short-lived deals.
   const day = updated.slice(0, 10);
-  const urls = ["/", "/destek/", "/endirimler/", ...EVENTS.map((ev) => `/endirimler/${ev.slug}/`), "/magazalar/", ...categories.map((c) => `/endirimler/${c.slug}/`), ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c))];
-  writeFileSync(
-    join(ROOT, "sitemap.xml"),
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-      .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${day}</lastmod><changefreq>daily</changefreq></url>`)
-      .join("\n")}\n</urlset>\n`,
-  );
+  const sitemaps = {
+    "sitemap-stores.xml": ["/", "/destek/", "/endirimler/", ...EVENTS.map((ev) => `/endirimler/${ev.slug}/`), "/magazalar/", ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...storeCats.map((sc) => sc.path)],
+    "sitemap-categories.xml": categories.map((c) => `/endirimler/${c.slug}/`),
+    "sitemap-deals.xml": campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c)),
+  };
+  for (const [file, list] of Object.entries(sitemaps)) {
+    writeFileSync(join(ROOT, file), urlsetXml(list, day));
+  }
+  writeFileSync(join(ROOT, "sitemap.xml"), sitemapIndexXml(Object.keys(sitemaps), day));
+  const urls = Object.values(sitemaps).flat();
   writeFileSync(join(ROOT, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /web/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
   const landing = {

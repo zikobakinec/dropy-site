@@ -1,0 +1,146 @@
+{
+  "/magaza/almali/elektronika/": {
+    "store": "Almali.az",
+    "storeSlug": "almali-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/almali/meiset-texnikasi/": {
+    "store": "Almali.az",
+    "storeSlug": "almali-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/arizon/ev-ve-bag/": {
+    "store": "Arizon",
+    "storeSlug": "arizon-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/arizon/idman/": {
+    "store": "Arizon",
+    "storeSlug": "arizon-seed",
+    "cat": "İdman və istirahət",
+    "catSlug": "idman"
+  },
+  "/magaza/arizon/meiset-texnikasi/": {
+    "store": "Arizon",
+    "storeSlug": "arizon-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/arizon/sehiyye/": {
+    "store": "Arizon",
+    "storeSlug": "arizon-seed",
+    "cat": "Sağlamlıq",
+    "catSlug": "sehiyye"
+  },
+  "/magaza/baku-electronics/elektronika/": {
+    "store": "Baku Electronics",
+    "storeSlug": "baku-electronics-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/baku-electronics/meiset-texnikasi/": {
+    "store": "Baku Electronics",
+    "storeSlug": "baku-electronics-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/baku-electronics/temir-tikinti/": {
+    "store": "Baku Electronics",
+    "storeSlug": "baku-electronics-seed",
+    "cat": "Təmir-tikinti",
+    "catSlug": "temir-tikinti"
+  },
+  "/magaza/era-electronics/elektronika/": {
+    "store": "ERA Electronics",
+    "storeSlug": "era-electronics-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/era-electronics/meiset-texnikasi/": {
+    "store": "ERA Electronics",
+    "storeSlug": "era-electronics-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/eurolux/elektronika/": {
+    "store": "Eurolux",
+    "storeSlug": "eurolux-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/eurolux/meiset-texnikasi/": {
+    "store": "Eurolux",
+    "storeSlug": "eurolux-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/evfemiya/ev-ve-bag/": {
+    "store": "Evfemiya",
+    "storeSlug": "evfemiya-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/evfemiya/meiset-texnikasi/": {
+    "store": "Evfemiya",
+    "storeSlug": "evfemiya-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/irshad/elektronika/": {
+    "store": "İrşad Electronics",
+    "storeSlug": "irshad-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/irshad/ev-ve-bag/": {
+    "store": "İrşad Electronics",
+    "storeSlug": "irshad-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/irshad/meiset-texnikasi/": {
+    "store": "İrşad Electronics",
+    "storeSlug": "irshad-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/omid/ev-ve-bag/": {
+    "store": "Omid",
+    "storeSlug": "omid-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/omid/meiset-texnikasi/": {
+    "store": "Omid",
+    "storeSlug": "omid-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/omid/temir-tikinti/": {
+    "store": "Omid",
+    "storeSlug": "omid-seed",
+    "cat": "Təmir-tikinti",
+    "catSlug": "temir-tikinti"
+  },
+  "/magaza/serwant/ev-ve-bag/": {
+    "store": "Serwant (Emsan)",
+    "storeSlug": "serwant-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/serwant/meiset-texnikasi/": {
+    "store": "Serwant (Emsan)",
+    "storeSlug": "serwant-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/smarton/meiset-texnikasi/": {
+    "store": "Smarton",
+    "storeSlug": "smarton-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  }
+}

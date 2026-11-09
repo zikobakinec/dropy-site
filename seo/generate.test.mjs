@@ -54,7 +54,9 @@ test("middle way: hub, category and store pages each show their best few deals (
     "/magaza/bravo/", "/magaza/era/", "/magazalar/",
   ]);
   assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri və kataloqu<\/h1>/);
-  assert.match(pages["/magaza/era/"], /<title>ERA endirimləri, aksiyaları və kataloqu \(1\)/);
+  assert.match(pages["/magaza/era/"], /<title>ERA endirimləri və kataloqu \(Oktyabr 2026\) — 1 aktiv, 40%-dək \| Dropy\.az<\/title>/);
+  // Every page's footer links the strongest pages (internal linking, 2026-11-10).
+  assert.match(pages["/magaza/era/"], /class="popular"><a href="\/magaza\/bravo\/">BRAVO endirimləri<\/a>/);
   assert.match(pages["/magaza/era/"], /class="intro"/);
   // Cards lead to our own campaign page; only that page links out to the store.
   assert.match(pages["/magaza/era/"], /href="\/kampaniya\/mehsul-1-1\/"/);
@@ -181,4 +183,25 @@ test("event dates and phases: Black Friday 2026 is 27 November; 11.11 ends with 
   assert.equal(eventInSeason(ev, new Date("2026-10-30T12:00:00Z")), false);
   assert.equal(eventInSeason(ev, new Date("2026-11-01T12:00:00Z")), true);
   assert.equal(eventInSeason(ev, new Date("2026-11-13T12:00:00Z")), false);
+});
+
+test("store × category page appears only with enough deals, and the store page links to it (2026-11-10)", () => {
+  const rows = [1, 2, 3, 4].map((i) => row(i, "kontakt", 10 * i)).concat([row(5, "kontakt", 15, "geyim"), row(6, "bravo", 20, "market")]);
+  const { pages, storeCats } = buildSite(rows, new Date("2026-11-10T08:00:00Z"));
+  assert.deepEqual(storeCats.map((sc) => sc.path), ["/magaza/kontakt/elektronika/"]);
+  const p = pages["/magaza/kontakt/elektronika/"];
+  assert.match(p, /<title>KONTAKT elektronika endirimləri \(Noyabr 2026\) — 4 aktiv, 40%-dək \| Dropy\.az<\/title>/);
+  assert.match(p, /<h1>KONTAKT elektronika endirimləri<\/h1>/);
+  assert.ok(!pages["/magaza/kontakt/geyim/"], "1 deal is too thin for its own page");
+  assert.match(pages["/magaza/kontakt/"], /href="\/magaza\/kontakt\/elektronika\/"/);
+  assert.match(pages["/endirimler/elektronika/"], /<title>Elektronika endirimləri \(Noyabr 2026\) — 4 aktiv, 40%-dək/);
+});
+
+test("sitemap index lists the three sitemaps", async () => {
+  const { sitemapIndexXml, urlsetXml, monthYear } = await import("./generate.mjs");
+  const idx = sitemapIndexXml(["sitemap-stores.xml", "sitemap-deals.xml"], "2026-11-10");
+  assert.match(idx, /<sitemapindex/);
+  assert.match(idx, /<loc>https:\/\/dropy\.az\/sitemap-stores\.xml<\/loc>/);
+  assert.match(urlsetXml(["/magaza/era/"], "2026-11-10"), /<loc>https:\/\/dropy\.az\/magaza\/era\/<\/loc>/);
+  assert.equal(monthYear(new Date("2026-11-30T21:00:00Z")), "Dekabr 2026"); // Baku is already 1 Dec
 });
