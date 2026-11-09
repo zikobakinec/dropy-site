@@ -107,6 +107,12 @@
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
   },
+  "/magaza/noracora/geyim/": {
+    "store": "Noracora",
+    "storeSlug": "noracora",
+    "cat": "Geyim və ayaqqabı",
+    "catSlug": "geyim"
+  },
   "/magaza/omid/ev-ve-bag/": {
     "store": "Omid",
     "storeSlug": "omid-seed",
