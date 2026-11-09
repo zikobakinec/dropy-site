@@ -29,7 +29,7 @@ const PLAY_URL = "https://play.google.com/store/apps/details?id=az.endirim.aqreq
 // The app is Azerbaijan-only on the App Store: without /az/ the link shows "not found" elsewhere.
 const APP_STORE_URL = "https://apps.apple.com/az/app/id6819821532";
 const FEED_SELECT =
-  "id,title,description,discount_type,discount_value,discount_label,end_date,end_date_estimated,created_at,source_url,image_url,event_tag,stores(slug,name,logo_url),categories(slug,name_az)";
+  "id,title,description,discount_type,discount_value,discount_label,start_date,end_date,end_date_estimated,created_at,source_url,image_url,event_tag,stores(slug,name,logo_url),categories(slug,name_az)";
 const HUB_LIMIT = 60;
 // Until the site carries its own ads (AdSense), it shows a taste of each shelf,
 // not the whole catalog: a visitor who sees every deal on the web has no reason
@@ -666,6 +666,7 @@ export function campaignPage(c, similar, updated) {
           availability: "https://schema.org/InStock",
           url: isHttpUrl(c.source_url) ? c.source_url : `${SITE}${path}`,
           seller: { "@type": "Organization", name: store.name },
+          ...((c.start_date ?? c.created_at) ? { validFrom: String(c.start_date ?? c.created_at).slice(0, 10) } : {}),
           ...(realEnd ? { priceValidUntil: c.end_date.slice(0, 10) } : {}),
         },
       })
