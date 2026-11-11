@@ -745,16 +745,8 @@ export function shareStubPage(c, webPath) {
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/assets/icon.png" />
     <link rel="stylesheet" href="/assets/seo.css" />
-    <script>
-      (function () {
-        var ref = "utm_source=share&utm_medium=app&utm_campaign=deal";
-        var play = "${PLAY_URL}&referrer=" + encodeURIComponent(ref);
-        var ua = navigator.userAgent || "";
-        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        if (/Android/i.test(ua)) location.replace(play);
-        else if (isIOS) location.replace("${APP_STORE_URL}");
-      })();
-    </script>
+    <script src="/assets/go.js"></script>
+    <script>dropyGo("deal");</script>
   </head>
   <body>
     <main class="wrap">
@@ -762,7 +754,7 @@ export function shareStubPage(c, webPath) {
       <h1>${esc(c.title)}</h1>
       <p><img src="${esc(img)}" alt="" style="max-width:100%;max-height:360px" referrerpolicy="no-referrer" /></p>
       <p>
-        <a class="btn" href="${PLAY_URL}">Google Play-dən yüklə</a>
+        <a class="btn" id="play" href="${PLAY_URL}">Google Play-dən yüklə</a>
         <a class="btn" href="${APP_STORE_URL}">App Store-dan yüklə</a>
       </p>
       <p><a href="${webPath ?? "/endirimler/"}">${webPath ? "Endirimə saytda bax →" : "Bu günün endirimlərinə bax →"}</a></p>

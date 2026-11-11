@@ -214,4 +214,41 @@ test("shared deal link page previews the deal's own photo and discount", () => {
   assert.ok(html.includes('<meta property="og:title" content="-40% · Kukla &lt;Barbie&gt;" />'));
   assert.ok(html.includes('href="/kampaniya/kukla-barbie-6fb58678/"'));
   assert.match(html, /noindex/);
+  assert.ok(html.includes('<script src="/assets/go.js"></script>'));
+});
+
+// assets/go.js: a phone without the app counts the invite code, then goes to
+// its store with the code in Google Play's install referrer.
+async function runGo(search, ua) {
+  const { readFileSync } = await import("node:fs");
+  const { runInNewContext } = await import("node:vm");
+  const calls = { fetch: [], replace: [] };
+  const ctx = {
+    URLSearchParams,
+    JSON,
+    location: { search, replace: (u) => calls.replace.push(u) },
+    navigator: { userAgent: ua, platform: "Linux", maxTouchPoints: 0 },
+    document: { readyState: "complete", getElementById: () => null },
+    fetch: (url, opts) => { calls.fetch.push({ url, body: JSON.parse(opts.body) }); return Promise.resolve(); },
+    setTimeout: () => {},
+  };
+  ctx.window = ctx;
+  runInNewContext(readFileSync(new URL("../assets/go.js", import.meta.url), "utf8"), ctx);
+  ctx.dropyGo("deal");
+  await new Promise((r) => setImmediate(r));
+  return calls;
+}
+
+test("go.js counts a valid invite code and passes it to Google Play", async () => {
+  const calls = await runGo("?r=hm68jd", "Mozilla/5.0 (Linux; Android 14)");
+  assert.equal(calls.fetch.length, 1);
+  assert.deepEqual(calls.fetch[0].body, { p_code: "HM68JD", p_platform: "android" });
+  assert.equal(calls.replace.length, 1);
+  assert.ok(decodeURIComponent(calls.replace[0]).endsWith("utm_campaign=deal&r=HM68JD"));
+});
+
+test("go.js skips counting without a valid code and still redirects", async () => {
+  const calls = await runGo("?r=<bad>", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0)");
+  assert.equal(calls.fetch.length, 0);
+  assert.deepEqual(calls.replace, ["https://apps.apple.com/az/app/id6819821532"]);
 });

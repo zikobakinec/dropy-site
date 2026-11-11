@@ -7,17 +7,14 @@
     <title>Səhifə tapılmadı | Dropy.az</title>
     <link rel="icon" href="/assets/icon.png" />
     <link rel="stylesheet" href="/assets/seo.css" />
+    <script src="/assets/go.js"></script>
     <script>
       // An old campaign URL (its title, and so its slug, changed later) still
       // ends in the deal's 8-character id: look up today's address and go there.
       // A shared deal link (/a/k/<id>/) whose deal ended or isn't on the site
       // yet: send the phone to its store, like /a/ does.
       (function () {
-        if (!/^/a//.test(location.pathname)) return;
-        var ua = navigator.userAgent || "";
-        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        if (/Android/i.test(ua)) location.replace("https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru&referrer=" + encodeURIComponent("utm_source=share&utm_medium=app&utm_campaign=deal"));
-        else if (isIOS) location.replace("https://apps.apple.com/az/app/id6819821532");
+        if (location.pathname.indexOf("/a/") === 0) dropyGo("deal");
       })();
       (function () {
         var m = location.pathname.match(/^\/kampaniya\/(?:.*-)?([0-9a-f]{8})\/?$/);
