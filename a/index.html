@@ -9,25 +9,15 @@
     <meta property="og:image" content="https://dropy.az/assets/icon.png" />
     <link rel="icon" href="/assets/icon.png" />
     <link rel="stylesheet" href="/assets/seo.css" />
+    <script src="/assets/go.js"></script>
     <script>
-      // Links shared from the app (dropy.az/a/?k=<deal>|m=<store>|ref=dost).
-      // With Dropy.az installed, App Links / Universal Links open the app and
-      // this page never loads. Without it, send the phone to its store; the
-      // Play link carries the referrer for attribution.
+      // Links shared from the app (dropy.az/a/?k=<deal>|m=<store>, invites
+      // dropy.az/a/?r=<code>). With Dropy.az installed, App Links / Universal
+      // Links open the app and this page never loads. Without it, go.js counts
+      // the invite and sends the phone to its store.
       (function () {
         var q = new URLSearchParams(location.search);
-        var kind = q.get("k") ? "deal" : q.get("m") ? "store" : "invite";
-        var ref = "utm_source=share&utm_medium=app&utm_campaign=" + kind;
-        var play = "https://play.google.com/store/apps/details?id=az.endirim.aqreqatoru&referrer=" + encodeURIComponent(ref);
-        var ios = "https://apps.apple.com/az/app/id6819821532";
-        var ua = navigator.userAgent || "";
-        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        if (/Android/i.test(ua)) location.replace(play);
-        else if (isIOS) location.replace(ios);
-        document.addEventListener("DOMContentLoaded", function () {
-          document.getElementById("play").href = play;
-          document.getElementById("ios").href = ios;
-        });
+        dropyGo(q.get("k") ? "deal" : q.get("m") ? "store" : "invite");
       })();
     </script>
   </head>
