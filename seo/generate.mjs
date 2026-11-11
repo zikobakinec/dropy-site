@@ -712,6 +712,66 @@ ${grid(similar)}` : "") +
 // URL keeps answering (noindex, follow) for ENDED_KEEP_DAYS instead of turning
 // into a 404 for a page Google already indexed (2026-10-31: the showcase switch
 // on 10-29 had dropped ~1,700 such pages).
+// ---------- shared-deal link pages (/a/k/<id>/) ----------
+
+// The app shares a deal as dropy.az/a/k/<id>/ (2026-11-12). With Dropy.az
+// installed, App Links / Universal Links (/a and /a/* — app.json,
+// .well-known) open the deal in the app. Without it, this small page gives
+// WhatsApp/Telegram a preview with the deal's own photo, discount and store,
+// then sends the phone to its store; a computer sees the deal and the links.
+export function shareLinkPath(c) {
+  return `/a/k/${c.id}/`;
+}
+
+export function shareStubPage(c, webPath) {
+  const store = c.stores;
+  const b = badge(c);
+  const img = isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`;
+  const title = `${b} · ${c.title}`;
+  const desc = `${store.name} — Dropy.az tətbiqində bax`;
+  const path = shareLinkPath(c);
+  return `<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>${esc(title)}</title>
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(desc)}" />
+    <meta property="og:url" content="${SITE}${path}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="${esc(img)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/assets/icon.png" />
+    <link rel="stylesheet" href="/assets/seo.css" />
+    <script>
+      (function () {
+        var ref = "utm_source=share&utm_medium=app&utm_campaign=deal";
+        var play = "${PLAY_URL}&referrer=" + encodeURIComponent(ref);
+        var ua = navigator.userAgent || "";
+        var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (/Android/i.test(ua)) location.replace(play);
+        else if (isIOS) location.replace("${APP_STORE_URL}");
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="wrap">
+      <p class="lead">${esc(store.name)} · ${esc(b)}</p>
+      <h1>${esc(c.title)}</h1>
+      <p><img src="${esc(img)}" alt="" style="max-width:100%;max-height:360px" referrerpolicy="no-referrer" /></p>
+      <p>
+        <a class="btn" href="${PLAY_URL}">Google Play-dən yüklə</a>
+        <a class="btn" href="${APP_STORE_URL}">App Store-dan yüklə</a>
+      </p>
+      <p><a href="${webPath ?? "/endirimler/"}">${webPath ? "Endirimə saytda bax →" : "Bu günün endirimlərinə bax →"}</a></p>
+    </main>
+  </body>
+</html>
+`;
+}
+
 export function endedCampaignPage(entry, similar, updated, { inApp = false } = {}) {
   const crumbs = breadcrumbs([
     { name: "Dropy.az", path: "/" },
@@ -948,6 +1008,12 @@ async function main() {
   for (const c of campaigns) idMap[c.id.slice(0, 8)] = campaignPath(c);
   for (const [id, entry] of Object.entries(seen)) if (!idMap[id.slice(0, 8)]) idMap[id.slice(0, 8)] = entry.path;
   writeFileSync(join(ROOT, "kampaniya", "ids.json"), JSON.stringify(idMap) + "\n");
+
+  // Preview pages for links shared from the app, one per live deal (every
+  // feed row, not only the ones with an SEO page). Regenerated wholesale.
+  rmSync(join(ROOT, "a", "k"), { recursive: true, force: true });
+  const webPaths = new Map(campaigns.map((c) => [c.id, campaignPath(c)]));
+  for (const c of rows) if (c.stores) write(shareLinkPath(c), shareStubPage(c, webPaths.get(c.id)));
 
   // Three sitemaps under one index (2026-11-10): stores and event pages change
   // daily and matter most, so Google sees them separately from short-lived deals.

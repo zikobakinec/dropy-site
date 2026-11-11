@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -204,4 +204,14 @@ test("sitemap index lists the three sitemaps", async () => {
   assert.match(idx, /<loc>https:\/\/dropy\.az\/sitemap-stores\.xml<\/loc>/);
   assert.match(urlsetXml(["/magaza/era/"], "2026-11-10"), /<loc>https:\/\/dropy\.az\/magaza\/era\/<\/loc>/);
   assert.equal(monthYear(new Date("2026-11-30T21:00:00Z")), "Dekabr 2026"); // Baku is already 1 Dec
+});
+
+test("shared deal link page previews the deal's own photo and discount", () => {
+  const c = { id: "6fb58678-a39e-4e51-bb22-198823071174", title: "Kukla <Barbie>", discount_type: "percent", discount_value: 40, image_url: "https://img.example/b.jpg", stores: { slug: "supertoys-seed", name: "Supertoys", logo_url: null } };
+  assert.equal(shareLinkPath(c), "/a/k/6fb58678-a39e-4e51-bb22-198823071174/");
+  const html = shareStubPage(c, "/kampaniya/kukla-barbie-6fb58678/");
+  assert.ok(html.includes('<meta property="og:image" content="https://img.example/b.jpg" />'));
+  assert.ok(html.includes('<meta property="og:title" content="-40% · Kukla &lt;Barbie&gt;" />'));
+  assert.ok(html.includes('href="/kampaniya/kukla-barbie-6fb58678/"'));
+  assert.match(html, /noindex/);
 });
