@@ -1,4 +1,28 @@
 {
+  "/magaza/alinino/elektronika/": {
+    "store": "Alinino",
+    "storeSlug": "alinino-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/alinino/eylence/": {
+    "store": "Alinino",
+    "storeSlug": "alinino-seed",
+    "cat": "Əyləncə və hobbi",
+    "catSlug": "eylence"
+  },
+  "/magaza/alinino/geyim/": {
+    "store": "Alinino",
+    "storeSlug": "alinino-seed",
+    "cat": "Geyim və ayaqqabı",
+    "catSlug": "geyim"
+  },
+  "/magaza/alinino/usaq-mehsullari/": {
+    "store": "Alinino",
+    "storeSlug": "alinino-seed",
+    "cat": "Uşaq aləmi",
+    "catSlug": "usaq-mehsullari"
+  },
   "/magaza/almali/elektronika/": {
     "store": "Almali.az",
     "storeSlug": "almali-seed",
