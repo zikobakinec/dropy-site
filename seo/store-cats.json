@@ -131,6 +131,12 @@
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
   },
+  "/magaza/magichome/ev-ve-bag/": {
+    "store": "Magic Home",
+    "storeSlug": "magichome-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
   "/magaza/noracora/geyim/": {
     "store": "Noracora",
     "storeSlug": "noracora",
@@ -154,6 +160,12 @@
     "storeSlug": "omid-seed",
     "cat": "Təmir-tikinti",
     "catSlug": "temir-tikinti"
+  },
+  "/magaza/rossmann/gozellik/": {
+    "store": "Rossmann",
+    "storeSlug": "rossmann-seed",
+    "cat": "Gözəllik və baxım",
+    "catSlug": "gozellik"
   },
   "/magaza/serwant/ev-ve-bag/": {
     "store": "Serwant (Emsan)",
