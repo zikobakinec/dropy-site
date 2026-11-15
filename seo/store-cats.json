@@ -161,11 +161,23 @@
     "cat": "Təmir-tikinti",
     "catSlug": "temir-tikinti"
   },
+  "/magaza/rossmann/ev-ve-bag/": {
+    "store": "Rossmann",
+    "storeSlug": "rossmann-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
   "/magaza/rossmann/gozellik/": {
     "store": "Rossmann",
     "storeSlug": "rossmann-seed",
     "cat": "Gözəllik və baxım",
     "catSlug": "gozellik"
+  },
+  "/magaza/rossmann/meiset-texnikasi/": {
+    "store": "Rossmann",
+    "storeSlug": "rossmann-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
   },
   "/magaza/serwant/ev-ve-bag/": {
     "store": "Serwant (Emsan)",
