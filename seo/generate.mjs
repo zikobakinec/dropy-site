@@ -105,6 +105,11 @@ export const STORE_CAT_MIN = 4;
 // Links to the strongest pages, set by buildSite() and shown in every footer
 // and on the landing: internal links from the home page (position 2) lift them.
 let popularLinks = [];
+// Ids of the deals that get a /kampaniya/ page this run (null = all of them).
+// ItemList JSON-LD may only point at those: it used to list every deal of a
+// store, and Google followed ~1,100 of those URLs into 404s (Search Console,
+// 2026-11-15) because only the showcase deals have pages.
+let pageIds = null;
 
 export function esc(s) {
   return String(s ?? "")
@@ -299,12 +304,13 @@ function grid(items, opts) {
 }
 
 function itemListLd(name, items) {
+  const listed = items.filter((c) => !pageIds || pageIds.has(c.id)).slice(0, 100);
   return jsonLd({
     "@context": "https://schema.org",
     "@type": "ItemList",
     name,
-    numberOfItems: items.length,
-    itemListElement: items.slice(0, 100).map((c, i) => ({
+    numberOfItems: listed.length,
+    itemListElement: listed.map((c, i) => ({
       "@type": "ListItem",
       position: i + 1,
       name: `${c.title} — ${badge(c)}`,
@@ -378,6 +384,7 @@ export function buildSite(rows, now = new Date()) {
   ];
 
   const shown = FULL_CATALOG ? campaigns : [...shownById.values()];
+  pageIds = FULL_CATALOG ? null : new Set(shownById.keys());
   const inApp = (total, listed) =>
     total > listed
       ? `      <p class="lead"><b>Qalan ${total - listed} endirim Dropy.az tətbiqində.</b> Yeni endirim çıxanda tətbiq bildiriş göndərir.</p>\n`
@@ -449,8 +456,8 @@ export function buildSite(rows, now = new Date()) {
     const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Mağazalar", path: "/magazalar/" }, { name: st.name, path }]);
     pages[path] =
       head({
-        title: `${st.name} endirimləri və kataloqu (${month}) — ${items.length} aktiv${best ? `, ${best}%-dək` : ""} | Dropy.az`,
-        description: `${st.name} endirim jurnalı və kataloqu, ${month}: bu həftənin ${items.length} aktiv aksiyası${best ? `, ${best}%-dək endirim` : ""}. Siyahı hər gün yenilənir.`,
+        title: storeTitle(st.name, items.length, best, month),
+        description: storeDescription(st.name, items, month),
         path,
         extra: `    ${crumbs.ld}\n    ${itemListLd(`${st.name} endirimləri`, items)}\n`,
       }) +
@@ -588,6 +595,23 @@ ${items.length ? `    ${itemListLd(`${ev.name} endirimləri`, items)}
 ` +
     foot(updated)
   );
+}
+
+// Search Console 2026-11-15: store pages sit around position 7–9 with almost
+// no clicks ("era electronics" 196 impressions, 0 clicks). The old title put
+// the numbers after the month, past where Google cuts it (~60 chars), and the
+// description was generic. Now the discount and count come first and the
+// description names real deals with their discount.
+export function storeTitle(name, count, best, month) {
+  return `${name} endirimləri${best ? ` ${best}%-dək` : ""} — ${count} aksiya, kataloq (${month}) | Dropy.az`;
+}
+
+export function storeDescription(name, items, month) {
+  const short = (t) => (t.length > 40 ? `${t.slice(0, 40).replace(/\s+\S*$/, "")}…` : t);
+  // Only a real "-43%" / "-30 ₼" reads as a reason to click; store labels like "Yeni endirim" don't.
+  const top = items.slice(0, 2).map((c) => (badge(c).startsWith("-") ? `${short(c.title)} ${badge(c)}` : short(c.title)));
+  const rest = items.length - top.length;
+  return `${name} endirimləri, ${month}: ${top.join(", ")}${rest > 0 ? ` və daha ${rest} aksiya` : ""}. Endirim jurnalı və kataloq hər gün yenilənir.`;
 }
 
 // A few lines of real text: store pages are what people find on Google
@@ -760,6 +784,23 @@ export function shareStubPage(c, webPath) {
       <p><a href="${webPath ?? "/endirimler/"}">${webPath ? "Endirimə saytda bax →" : "Bu günün endirimlərinə bax →"}</a></p>
     </main>
   </body>
+</html>
+`;
+}
+
+/** A page that only forwards to `target`; Google treats an instant meta refresh as a permanent redirect. */
+export function redirectPage(target) {
+  const url = `${SITE}${target}`;
+  return `<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=${esc(target)}" />
+    <link rel="canonical" href="${esc(url)}" />
+    <title>Dropy.az</title>
+    <script>location.replace(${JSON.stringify(target)});</script>
+  </head>
+  <body><a href="${esc(target)}">${esc(url)}</a></body>
 </html>
 `;
 }
@@ -971,8 +1012,12 @@ async function main() {
   const seen = existsSync(campaignFile) ? JSON.parse(readFileSync(campaignFile, "utf8")) : {};
   const nowMs = Date.parse(updated);
   for (const c of campaigns) {
+    const prev = seen[c.id];
+    const path = campaignPath(c);
+    const aliases = [...new Set([...(prev?.aliases ?? []), ...(prev?.path && prev.path !== path ? [prev.path] : [])])].filter((a) => a !== path);
     seen[c.id] = {
-      path: campaignPath(c),
+      path,
+      ...(aliases.length ? { aliases } : {}),
       title: c.title,
       storeSlug: c.stores.slug,
       storeName: c.stores.name,
@@ -993,6 +1038,14 @@ async function main() {
     write(entry.path, endedCampaignPage(entry, similar, updated, { inApp: liveInFeed.has(id) }));
   }
   writeFileSync(campaignFile, JSON.stringify(seen, null, 1) + "\n");
+  // A deal whose title (so its slug) changed keeps its old addresses as real
+  // redirect pages: GitHub Pages can't send a 301, and the /404.html JS hop
+  // still answers HTTP 404, which Search Console counted as broken pages.
+  for (const entry of Object.values(seen)) {
+    for (const alias of entry.aliases ?? []) {
+      if (!existsSync(join(ROOT, alias, "index.html"))) write(alias, redirectPage(entry.path));
+    }
+  }
   // A deal's title can change after Google indexed it, which changes its slug
   // (…-coox-… → …-cooox-…) while the trailing id stays. /404.html uses this map
   // to send such old URLs to the current page (Search Console, 2026-10-31).

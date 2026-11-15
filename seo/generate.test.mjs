@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -54,7 +54,7 @@ test("middle way: hub, category and store pages each show their best few deals (
     "/magaza/bravo/", "/magaza/era/", "/magazalar/",
   ]);
   assert.match(pages["/magaza/era/"], /<h1>ERA endirimləri və kataloqu<\/h1>/);
-  assert.match(pages["/magaza/era/"], /<title>ERA endirimləri və kataloqu \(Oktyabr 2026\) — 1 aktiv, 40%-dək \| Dropy\.az<\/title>/);
+  assert.match(pages["/magaza/era/"], /<title>ERA endirimləri 40%-dək — 1 aksiya, kataloq \(Oktyabr 2026\) \| Dropy\.az<\/title>/);
   // Every page's footer links the strongest pages (internal linking, 2026-11-10).
   assert.match(pages["/magaza/era/"], /class="popular"><a href="\/magaza\/bravo\/">BRAVO endirimləri<\/a>/);
   assert.match(pages["/magaza/era/"], /class="intro"/);
@@ -251,4 +251,29 @@ test("go.js skips counting without a valid code and still redirects", async () =
   const calls = await runGo("?r=<bad>", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0)");
   assert.equal(calls.fetch.length, 0);
   assert.deepEqual(calls.replace, ["https://apps.apple.com/az/app/id6819821532"]);
+});
+
+test("ItemList JSON-LD only links deals that have their own page", () => {
+  const rows = Array.from({ length: 30 }, (_, i) => row(`id${String(i).padStart(6, "0")}`, "kontakt", 10 + i));
+  const { pages } = buildSite(rows, new Date("2026-11-15T08:00:00Z"));
+  for (const [path, html] of Object.entries(pages)) {
+    for (const [, url] of html.matchAll(/"url":"https:\/\/dropy\.az(\/kampaniya\/[^"]+)"/g)) {
+      assert.ok(pages[url], `${path} links ${url}, which has no page`);
+    }
+  }
+});
+
+test("store title leads with the discount; description names real deals", () => {
+  assert.equal(storeTitle("ERA", 50, 43, "Noyabr 2026"), "ERA endirimləri 43%-dək — 50 aksiya, kataloq (Noyabr 2026) | Dropy.az");
+  assert.equal(storeTitle("ERA", 3, 0, "Noyabr 2026"), "ERA endirimləri — 3 aksiya, kataloq (Noyabr 2026) | Dropy.az");
+  const items = [row("a1", "era", 43), row("a2", "era", 20), row("a3", "era", 10)];
+  items[0].title = "Samsung Galaxy A55 smartfonu 8/256 GB qara rəngdə yeni model";
+  const d = storeDescription("ERA", items, "Noyabr 2026");
+  assert.match(d, /^ERA endirimləri, Noyabr 2026: Samsung Galaxy A55 smartfonu 8\/256 GB…? -43%, Məhsul a2 -20% və daha 1 aksiya\./);
+});
+
+test("redirect page forwards instantly and names the target as canonical", () => {
+  const html = redirectPage("/kampaniya/yeni-ad-1234abcd/");
+  assert.match(html, /http-equiv="refresh" content="0; url=\/kampaniya\/yeni-ad-1234abcd\/"/);
+  assert.match(html, /rel="canonical" href="https:\/\/dropy\.az\/kampaniya\/yeni-ad-1234abcd\/"/);
 });
