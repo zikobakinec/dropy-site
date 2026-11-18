@@ -196,5 +196,23 @@
     "storeSlug": "smarton-seed",
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/texnohome/elektronika/": {
+    "store": "Texno Home",
+    "storeSlug": "texnohome-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/texnohome/gozellik/": {
+    "store": "Texno Home",
+    "storeSlug": "texnohome-seed",
+    "cat": "Gözəllik və baxım",
+    "catSlug": "gozellik"
+  },
+  "/magaza/texnohome/meiset-texnikasi/": {
+    "store": "Texno Home",
+    "storeSlug": "texnohome-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
   }
 }
