@@ -77,6 +77,18 @@
     "cat": "Təmir-tikinti",
     "catSlug": "temir-tikinti"
   },
+  "/magaza/elit-optimal/elektronika/": {
+    "store": "Elit Optimal",
+    "storeSlug": "elit-optimal-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/elit-optimal/meiset-texnikasi/": {
+    "store": "Elit Optimal",
+    "storeSlug": "elit-optimal-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
   "/magaza/era-electronics/elektronika/": {
     "store": "ERA Electronics",
     "storeSlug": "era-electronics-seed",
