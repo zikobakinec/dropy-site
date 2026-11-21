@@ -149,6 +149,12 @@
     "cat": "Ev və bağ",
     "catSlug": "ev-ve-bag"
   },
+  "/magaza/myfilter-az-mv24szib/meiset-texnikasi/": {
+    "store": "Myfilter.az",
+    "storeSlug": "myfilter-az-mv24szib",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
   "/magaza/noracora/geyim/": {
     "store": "Noracora",
     "storeSlug": "noracora",
