@@ -62,6 +62,9 @@ export const EVENTS = [
     tag: "black-friday",
     slug: "black-friday",
     name: "Black Friday",
+    alt: "Qara Cümə",
+    // Searches like "black friday 2026 nə vaxtdır" (2026-11-21): the page answers them in text.
+    followUp: { name: "Kiber Bazar ertəsi (Cyber Monday)", days: 3 },
     // The Friday after the fourth Thursday of November.
     day: (y) => {
       const first = new Date(Date.UTC(y, 10, 1)).getUTCDay();
@@ -105,6 +108,10 @@ export const STORE_CAT_MIN = 4;
 // Links to the strongest pages, set by buildSite() and shown in every footer
 // and on the landing: internal links from the home page (position 2) lift them.
 let popularLinks = [];
+// In-season event links shown at the top of every generated page (Black Friday
+// 2026-11-21): a site-wide internal link is the strongest on-site signal we
+// can give the event page before the day.
+let seasonLinks = [];
 // Ids of the deals that get a /kampaniya/ page this run (null = all of them).
 // ItemList JSON-LD may only point at those: it used to list every deal of a
 // store, and Google followed ~1,100 of those URLs into 404s (Search Console,
@@ -241,7 +248,8 @@ ${extra}  </head>
       </div>
     </header>
     <main class="wrap">
-`;
+${seasonLinks.filter((l) => l.path !== path).map((l) => `      <p class="season-bar"><a href="${l.path}">${esc(l.name)} →</a></p>
+`).join("")}`;
 }
 
 function appBanner() {
@@ -377,6 +385,10 @@ export function buildSite(rows, now = new Date()) {
   for (const sc of storeCats) for (const c of sc.items.slice(0, PAGE_TOP)) shownById.set(c.id, c);
   const storeCatPath = new Map(storeCats.map((sc) => [`${sc.store.slug}|${sc.cat.slug}`, sc.path]));
 
+  seasonLinks = seasonal.map((ev) => {
+    const n = eventItems.get(ev.tag).length;
+    return { path: `/endirimler/${ev.slug}/`, name: `${ev.name} ${now.getUTCFullYear()} endirimləri${n ? ` — ${n} aksiya` : ""}` };
+  });
   popularLinks = [
     ...seasonal.map((ev) => ({ path: `/endirimler/${ev.slug}/`, name: `${ev.name} endirimləri` })),
     ...[...stores].sort((a, b) => b.items.length - a.items.length).slice(0, 8).map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: `${s.name} endirimləri` })),
@@ -551,13 +563,25 @@ export function storeCatPage({ store, cat, items, path }, month, updated, inApp)
   );
 }
 
+const AZ_WEEKDAYS = ["bazar", "bazar ertəsi", "çərşənbə axşamı", "çərşənbə", "cümə axşamı", "cümə", "şənbə"];
+
+// Event page, reworked 2026-11-21 for Black Friday searches: the title leads
+// with "<Event> <year>", the page answers "nə vaxtdır?" in plain text, names
+// the stores that announced a campaign, and is never thin before stores
+// announce (the week's biggest discounts fill it up to EVENT_MIN_CARDS).
+export const EVENT_MIN_CARDS = 12;
+
 export function eventPage(ev, all, fallback, updated, now = new Date()) {
   const path = `/endirimler/${ev.slug}/`;
   const year = new Date(now.getTime() + 4 * 3600_000).getUTCFullYear();
   const items = FULL_CATALOG ? all : all.slice(0, SHOWCASE_LIMIT);
   const eventStores = [...new Map(all.map((c) => [c.stores.slug, c.stores])).values()];
-  const dayText = azDate(ev.day(year).toISOString()).replace(/ \d{4}$/, "");
+  const day = ev.day(year);
+  const dayText = azDate(day.toISOString()).replace(/ \d{4}$/, "");
+  const weekday = AZ_WEEKDAYS[day.getUTCDay()];
+  const follow = ev.followUp ? new Date(day.getTime() + ev.followUp.days * 24 * 3600_000) : null;
   const after = eventPhase(ev, now) === "after";
+  const alt = ev.alt ? ` (${ev.alt})` : "";
   const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirimlər", path: "/endirimler/" }, { name: `${ev.name} endirimləri`, path }]);
   const lead = all.length
     ? `      <p class="lead">${eventStores.length} mağazada <b>${all.length}</b> ${esc(ev.name)} endirimi və kampaniyası. Siyahı hər gün yenilənir.</p>
@@ -567,31 +591,55 @@ export function eventPage(ev, all, fallback, updated, now = new Date()) {
 `
       : `      <p class="lead">${esc(ev.name)} (${esc(dayText)}) kampaniyaları mağazalar elan etdikcə bu səhifəyə əlavə olunur. Sevdiyin mağazaları Dropy.az tətbiqində izlə — yeni endirim çıxanda bildiriş alacaqsan.</p>
 `;
+  const when =
+    `      <h2>${esc(ev.name)} ${year} nə vaxtdır?</h2>
+      <p class="intro">${esc(ev.name)}${esc(alt)} ${year} — <b>${esc(dayText)}, ${esc(weekday)}</b>.` +
+    (follow ? ` Endirimlər çox vaxt bütün həftə davam edir və ${esc(azDate(follow.toISOString()).replace(/ \d{4}$/, ""))} — ${esc(ev.followUp.name)} günü bitir.` : "") +
+    ` Bəzi mağazalar aksiyanı bir neçə gün əvvəl başladır, ona görə bu səhifə hər gün yenilənir.</p>
+`;
+  const storesBlock =
+    `      <h2>Hansı mağazalarda ${esc(ev.name)} endirimi var?</h2>
+` +
+    (eventStores.length
+      ? `      <p class="intro">${eventStores.length} mağaza ${esc(ev.name)} kampaniyası elan edib. Mağazanın adına bas — onun bütün endirimlərini görəcəksən.</p>
+` + chips(eventStores.map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: s.name, count: all.filter((c) => c.stores.slug === s.slug).length })))
+      : `      <p class="intro">Hələ heç bir mağaza ${esc(ev.name)} kampaniyası elan etməyib. Elan olunan kimi burada görünəcək.</p>
+`);
+  // Fill a short list with the week's biggest discounts so the page is never thin.
+  const shownIds = new Set(items.map((c) => c.id));
+  const extra = [...fallback].filter((c) => !shownIds.has(c.id)).sort((a, b) => percentOf(b) - percentOf(a)).slice(0, Math.max(0, EVENT_MIN_CARDS - items.length));
+  const listed = [...items, ...extra];
   return (
     head({
-      title: `${ev.name} endirimləri ${year} — kampaniyalar və aksiyalar | Dropy.az`,
+      title: `${ev.name} ${year} — endirimlər, kampaniyalar, tarix | Dropy.az`,
       description: all.length
-        ? `${ev.name} ${year}: ${eventStores.length} mağazanın ${all.length} endirimi və kampaniyası bir yerdə. ${eventStores.slice(0, 5).map((s) => s.name).join(", ")}${eventStores.length > 5 ? " və digərləri" : ""}.`
-        : `${ev.name} ${year} endirimləri, kampaniyaları və aksiyaları bir yerdə: mağazalar elan etdikcə bu səhifəyə əlavə olunur, hər gün yenilənir.`,
+        ? `${ev.name}${alt} ${year} — ${dayText}. ${eventStores.length} mağazanın ${all.length} endirimi bir yerdə: ${eventStores.slice(0, 5).map((s) => s.name).join(", ")}${eventStores.length > 5 ? " və digərləri" : ""}. Hər gün yenilənir.`
+        : `${ev.name}${alt} ${year} — ${dayText}. Endirimlər, kampaniyalar və aksiyalar bir yerdə: mağazalar elan etdikcə bu səhifəyə əlavə olunur, hər gün yenilənir.`,
       path,
       extra: `    ${crumbs.ld}
-${items.length ? `    ${itemListLd(`${ev.name} endirimləri`, items)}
+    ${jsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: `${ev.name} endirimləri ${year}`, url: `${SITE}${path}`, dateModified: updated, inLanguage: "az" })}
+${listed.length ? `    ${itemListLd(`${ev.name} endirimləri`, listed)}
 ` : ""}`,
     }) +
     crumbs.html +
-    `      <h1>${esc(ev.name)} endirimləri ${year}</h1>
+    `      <h1>${esc(ev.name)} endirimləri ${year}${esc(alt)}</h1>
 ` +
     lead +
     `      <p class="intro">${esc(ev.about)} Dropy.az mağazaların öz saytlarındakı ${esc(ev.name)} kampaniyalarını bir səhifəyə toplayır, ayrı-ayrı saytları gəzməyə ehtiyac qalmır.</p>
 ` +
-    (all.length ? chips(eventStores.map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: s.name, count: all.filter((c) => c.stores.slug === s.slug).length }))) : "") +
     appBanner() +
     (items.length
-      ? grid(items) + (FULL_CATALOG ? "" : all.length > items.length ? `      <p class="lead"><b>Qalan ${all.length - items.length} ${esc(ev.name)} endirimi Dropy.az tətbiqində.</b></p>
+      ? `      <h2>${esc(ev.name)} ${year} endirimləri</h2>
+` + grid(items) + (FULL_CATALOG ? "" : all.length > items.length ? `      <p class="lead"><b>Qalan ${all.length - items.length} ${esc(ev.name)} endirimi Dropy.az tətbiqində.</b></p>
 ` : "")
-      : `      <h2>Bu günün seçilmiş endirimləri</h2>
-` + grid(fallback.slice(0, 8))) +
-    `      <p><a href="/endirimler/">Bu günün bütün endirimləri →</a></p>
+      : "") +
+    (extra.length
+      ? `      <h2>${items.length ? `${esc(ev.name)} həftəsinin digər böyük endirimləri` : "Bu günün seçilmiş endirimləri"}</h2>
+` + grid(extra)
+      : "") +
+    when +
+    storesBlock +
+    `      <p><a href="/endirimler/">Bu günün bütün endirimləri →</a> · <a href="/magazalar/">Bütün mağazalar →</a></p>
 ` +
     foot(updated)
   );

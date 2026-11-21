@@ -164,7 +164,9 @@ test("event pages always exist, fill with tagged deals and get linked from the h
   const { pages } = buildSite(rows, nov5);
   const p = pages["/endirimler/11-11/"];
   assert.ok(p.includes("<h1>11.11 endirimləri 2026</h1>"));
-  assert.ok(p.includes("Məhsul 3") && p.includes("Məhsul 4") && !p.includes("Məhsul 1<"));
+  assert.ok(p.includes("Məhsul 3") && p.includes("Məhsul 4"));
+  // Few tagged deals: the week's other big discounts fill the page under their own heading (2026-11-21).
+  assert.ok(p.indexOf("Məhsul 4") < p.indexOf("həftəsinin digər böyük endirimləri") && p.includes("Məhsul 1<"));
   assert.ok(pages[campaignPath(rows[2])], "tagged deals get their own campaign page");
   assert.ok(pages["/endirimler/"].includes('href="/endirimler/11-11/"'));
   assert.ok(!pages["/endirimler/"].includes('href="/endirimler/black-friday/"'));
@@ -276,4 +278,24 @@ test("redirect page forwards instantly and names the target as canonical", () =>
   const html = redirectPage("/kampaniya/yeni-ad-1234abcd/");
   assert.match(html, /http-equiv="refresh" content="0; url=\/kampaniya\/yeni-ad-1234abcd\/"/);
   assert.match(html, /rel="canonical" href="https:\/\/dropy\.az\/kampaniya\/yeni-ad-1234abcd\/"/);
+});
+
+test("Black Friday page answers when it is, names stores, and every page links to it in season (2026-11-21)", () => {
+  const rows = [row(1, "era", 40), { ...row(2, "bravo", 30), event_tag: "black-friday" }];
+  const { pages } = buildSite(rows, new Date("2026-11-21T08:00:00Z"));
+  const bf = pages["/endirimler/black-friday/"];
+  assert.match(bf, /<title>Black Friday 2026 — endirimlər, kampaniyalar, tarix \| Dropy\.az<\/title>/);
+  assert.match(bf, /<h1>Black Friday endirimləri 2026 \(Qara Cümə\)<\/h1>/);
+  assert.match(bf, /Black Friday 2026 nə vaxtdır\?/);
+  assert.match(bf, /<b>27 noyabr, cümə<\/b>/);
+  assert.match(bf, /30 noyabr — Kiber Bazar ertəsi \(Cyber Monday\) günü bitir/);
+  assert.match(bf, /Hansı mağazalarda Black Friday endirimi var\?/);
+  assert.match(bf, /"dateModified"/);
+  assert.ok(!bf.includes("Bakı"));
+  assert.ok(!bf.includes('class="season-bar"'), "no bar linking the page to itself");
+  for (const path of ["/endirimler/", "/magaza/era/", campaignPath(rows[0])]) {
+    assert.match(pages[path], /class="season-bar"><a href="\/endirimler\/black-friday\/">Black Friday 2026 endirimləri — 1 aksiya →/, path);
+  }
+  const off = buildSite(rows, new Date("2026-12-10T08:00:00Z")).pages;
+  assert.ok(!off["/endirimler/"].includes("season-bar"));
 });
