@@ -77,6 +77,12 @@
     "cat": "Təmir-tikinti",
     "catSlug": "temir-tikinti"
   },
+  "/magaza/bir-market/elektronika/": {
+    "store": "Bir Market",
+    "storeSlug": "bir-market-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
   "/magaza/elit-optimal/elektronika/": {
     "store": "Elit Optimal",
     "storeSlug": "elit-optimal-seed",
@@ -137,9 +143,33 @@
     "cat": "Ev və bağ",
     "catSlug": "ev-ve-bag"
   },
+  "/magaza/irshad/idman/": {
+    "store": "İrşad Electronics",
+    "storeSlug": "irshad-seed",
+    "cat": "İdman və istirahət",
+    "catSlug": "idman"
+  },
   "/magaza/irshad/meiset-texnikasi/": {
     "store": "İrşad Electronics",
     "storeSlug": "irshad-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/kontakt-home/elektronika/": {
+    "store": "Kontakt Home",
+    "storeSlug": "kontakt-home-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/kontakt-home/ev-ve-bag/": {
+    "store": "Kontakt Home",
+    "storeSlug": "kontakt-home-seed",
+    "cat": "Ev və bağ",
+    "catSlug": "ev-ve-bag"
+  },
+  "/magaza/kontakt-home/meiset-texnikasi/": {
+    "store": "Kontakt Home",
+    "storeSlug": "kontakt-home-seed",
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
   },
@@ -214,6 +244,12 @@
     "storeSlug": "smarton-seed",
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/tamstore/market/": {
+    "store": "Tamstore",
+    "storeSlug": "tamstore-seed",
+    "cat": "Market",
+    "catSlug": "market"
   },
   "/magaza/texnohome/elektronika/": {
     "store": "Texno Home",
