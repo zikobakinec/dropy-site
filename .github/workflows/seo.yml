@@ -26,6 +26,11 @@ jobs:
           node-version: 22
       - run: node --test seo/generate.test.mjs
       - run: node seo/generate.mjs
+        env:
+          # Market catalog pages (/endirim-jurnali/) read the public anon RPCs;
+          # without these two secrets the step still runs and skips them.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       - name: Commit if anything changed
         run: |
           git config user.name "dropy-bot"

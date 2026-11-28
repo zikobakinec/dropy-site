@@ -11,6 +11,7 @@
 //   /magaza/<slug>/              one page per store
 //   /kampaniya/<ad>-<id>/        one page per campaign (kept 30 days after it ends)
 //   /endirimler/11-11/, /endirimler/black-friday/   shopping-event pages (EVENTS)
+//   /endirim-jurnali/, /endirim-jurnali/<market>/   market catalog pages (needs SUPABASE_URL + SUPABASE_ANON_KEY)
 //   /sitemap.xml, /robots.txt
 // and a marked block of internal links + structured data in /index.html.
 //
@@ -339,7 +340,7 @@ function write(path, html) {
 
 // ---------- pages ----------
 
-export function buildSite(rows, now = new Date()) {
+export function buildSite(rows, now = new Date(), { jurnalStores = new Map() } = {}) {
   const updated = now.toISOString();
   const campaigns = rows.filter((c) => c.stores?.slug && c.categories?.slug && c.title);
 
@@ -391,6 +392,7 @@ export function buildSite(rows, now = new Date()) {
   });
   popularLinks = [
     ...seasonal.map((ev) => ({ path: `/endirimler/${ev.slug}/`, name: `${ev.name} endirimləri` })),
+    ...(jurnalStores.size ? [{ path: JURNAL_HUB, name: "Market endirim jurnalları" }] : []),
     ...[...stores].sort((a, b) => b.items.length - a.items.length).slice(0, 8).map((s) => ({ path: `/magaza/${urlSlug(s.slug)}/`, name: `${s.name} endirimləri` })),
     ...categories.slice(0, 5).map((c) => ({ path: `/endirimler/${c.slug}/`, name: `${c.name} endirimləri` })),
   ];
@@ -478,6 +480,9 @@ export function buildSite(rows, now = new Date()) {
       <p class="lead"><b>${items.length}</b> aktiv endirim və kampaniya${best ? `, ${best}%-dək` : ""}.</p>
 ` +
       storeIntro(st.name) +
+      (jurnalStores.has(st.slug)
+        ? `      <p class="lead"><a href="${jurnalPath(st.slug)}">${esc(st.name)} endirim jurnalı — ${jurnalStores.get(st.slug)} məhsul →</a></p>\n`
+        : "") +
       chips(cats.map((c) => {
         const own = items.filter((o) => o.categories.slug === c.slug).length;
         const sub = storeCatPath.get(`${st.slug}|${c.slug}`);
@@ -1015,6 +1020,199 @@ function emptyStoreCatPage(path, e, updated) {
   );
 }
 
+// ---------- market catalog ("endirim jurnalı") pages ----------
+//
+// People search for a market's catalog far more than for "endirim" itself
+// (Keyword Planner, Azerbaijan, 2026-11-28: "bazarstore/bravo endirim jurnalı",
+// "al market endirim" 1K–10K a month each; "endirim" 100–1K), and Google's
+// top results for "endirim" are catalog pages. Market catalog products are
+// hidden from the public feed (RLS, migration 0087), so these pages read them
+// through the anon market_overview / market_browse RPCs (migration 0091).
+// The owner approved putting them on the site on 2026-11-28. Like every other
+// page, a market page shows a taste (JURNAL_TOP products), the rest is in the app.
+
+export const JURNAL_HUB = "/endirim-jurnali/";
+export const JURNAL_TOP = 24;
+const JURNAL_FETCH = 100;
+
+export function jurnalPath(storeSlug) {
+  return `${JURNAL_HUB}${urlSlug(storeSlug)}/`;
+}
+
+/** "2 dekabr" (Baku calendar, no year): the day a catalog ends. */
+export function azDay(iso) {
+  const d = new Date(new Date(iso).getTime() + 4 * 3600_000);
+  return `${d.getUTCDate()} ${AZ_MONTHS[d.getUTCMonth()]}`;
+}
+
+/** "12,99 ₼" — the catalogs' own comma format. */
+export function manat(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? `${n.toFixed(2).replace(".", ",")} ₼` : "";
+}
+
+function itemPrice(it) {
+  const now = manat(it.price);
+  const old = manat(it.old_price);
+  if (now && old && Number(it.old_price) > Number(it.price)) return `<s>${old}</s> <b>${now}</b>`;
+  if (now) return `<b>${now}</b>`;
+  return esc(it.discount_label ?? "");
+}
+
+function itemCard(it, storeLogo) {
+  const img = isHttpUrl(it.image_url) ? it.image_url : isHttpUrl(storeLogo) ? storeLogo : "/assets/icon.png";
+  return `        <article class="card">
+          <div class="card-img"><img src="${esc(img)}" alt="${esc(it.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(it))}</span></div>
+          <div class="card-body">
+            <h3>${esc(it.title)}</h3>
+            <span class="price">${itemPrice(it)}</span>
+          </div>
+        </article>
+`;
+}
+
+/**
+ * Market pages from the RPC data: markets = [{ store: {slug, name, logo_url},
+ * total, endsAt, subcats: [{name, count}], items: [market_browse rows] }].
+ */
+export function buildJurnal(markets, now = new Date()) {
+  const updated = now.toISOString();
+  const month = monthYear(now);
+  const live = markets.filter((m) => m.total > 0).sort((a, b) => b.total - a.total);
+  const pages = {};
+  const hubCrumb = { name: "Endirim jurnalları", path: JURNAL_HUB };
+
+  for (const m of live) {
+    const path = jurnalPath(m.store.slug);
+    const name = m.store.name;
+    const shown = m.items.slice(0, JURNAL_TOP);
+    const best = m.items.reduce((x, it) => Math.max(x, percentOf(it)), 0);
+    const ends = m.endsAt ? azDay(m.endsAt) : "";
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, hubCrumb, { name, path }]);
+    const examples = m.items
+      .filter((it) => manat(it.price))
+      .slice(0, 2)
+      .map((it) => `${it.title.length > 38 ? `${it.title.slice(0, 38).replace(/\s+\S*$/, "")}…` : it.title} ${manat(it.price)}`);
+    const others = live.filter((o) => o !== m);
+    pages[path] =
+      head({
+        title: `${name} endirim jurnalı — ${m.total} məhsul${ends ? `, ${ends}dək` : ""} (${month}) | Dropy.az`,
+        description: `${name} endirim jurnalı və kataloqu: ${m.total} endirimli məhsul${best ? `, ${best}%-dək` : ""}. ${examples.join(", ")}${examples.length ? " və digərləri. " : ""}Hər gün yenilənir.`,
+        path,
+        extra: `    ${crumbs.ld}\n`,
+      }) +
+      crumbs.html +
+      `      <h1>${esc(name)} endirim jurnalı</h1>
+      <p class="lead"><b>${m.total}</b> endirimli məhsul${best ? `, ${best}%-dək` : ""}${ends ? ` · ${esc(ends)} tarixinədək` : ""}.</p>
+      <p class="intro">${esc(name)}-in bu həftəki endirim jurnalındakı (kataloqundakı) məhsullar burada siyahı şəklində: jurnalı vərəqləmədən məhsulun köhnə və yeni qiymətinə bax. Siyahı hər gün yenilənir, jurnal bitəndə yenisi əlavə olunur. Bütün ${m.total} məhsulu, axtarışı və alış-veriş siyahısını Dropy.az tətbiqinin Market bölməsində tapa bilərsən.</p>
+` +
+      (m.subcats.length
+        ? `      <div class="chips">${m.subcats.map((c) => `<span>${esc(c.name)} <b>${c.count}</b></span>`).join("")}</div>\n`
+        : "") +
+      appBanner() +
+      `      <h2>Ən böyük endirimlər</h2>\n` +
+      `      <div class="grid">\n${shown.map((it) => itemCard(it, m.store.logo_url)).join("")}      </div>\n` +
+      (m.total > shown.length
+        ? `      <p class="lead"><b>Qalan ${m.total - shown.length} məhsul Dropy.az tətbiqində.</b> Yeni jurnal çıxanda tətbiq bildiriş göndərir.</p>\n`
+        : "") +
+      (others.length
+        ? `      <h2>Digər marketlərin endirim jurnalları</h2>\n      <div class="chips">${others.map((o) => `<a href="${jurnalPath(o.store.slug)}">${esc(o.store.name)} <b>${o.total}</b></a>`).join("")}</div>\n`
+        : "") +
+      `      <p><a href="/magaza/${esc(urlSlug(m.store.slug))}/">${esc(name)}-in digər endirimləri →</a></p>\n` +
+      foot(updated);
+  }
+
+  {
+    const path = JURNAL_HUB;
+    const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, hubCrumb]);
+    const names = live.map((m) => m.store.name);
+    const total = live.reduce((n, m) => n + m.total, 0);
+    pages[path] =
+      head({
+        title: `Endirim jurnalları — ${names.slice(0, 3).join(", ")}${names.length > 3 ? " və digərləri" : ""} | Dropy.az`,
+        description: `Marketlərin endirim jurnalları bir yerdə: ${names.join(", ")}. ${total} endirimli məhsul, köhnə və yeni qiymətlə. Hər gün yenilənir.`,
+        path,
+        extra: `    ${crumbs.ld}\n`,
+      }) +
+      crumbs.html +
+      `      <h1>Market endirim jurnalları</h1>
+      <p class="lead">${live.length} marketin aktual endirim jurnalı, cəmi <b>${total}</b> endirimli məhsul.</p>
+      <p class="intro">Marketlərin endirim jurnallarını (kataloqlarını) bir-bir vərəqləməyə ehtiyac yoxdur: hər marketin jurnalındakı məhsullar köhnə və yeni qiyməti ilə ayrıca səhifədədir. Jurnallar hər gün yoxlanılır, yenisi çıxanda səhifə yenilənir.</p>
+` +
+      `      <div class="grid">\n${live
+        .map((m) => {
+          const cover = m.items.find((it) => isHttpUrl(it.image_url))?.image_url ?? m.store.logo_url ?? "/assets/icon.png";
+          return `        <article class="card">
+          <a class="card-img" href="${jurnalPath(m.store.slug)}"><img src="${esc(cover)}" alt="${esc(m.store.name)} endirim jurnalı" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${m.total} məhsul</span></a>
+          <div class="card-body">
+            <h3><a href="${jurnalPath(m.store.slug)}">${esc(m.store.name)} endirim jurnalı</a></h3>
+            ${m.endsAt ? `<span class="ends">${esc(azDay(m.endsAt))} tarixinədək</span>` : ""}
+          </div>
+        </article>
+`;
+        })
+        .join("")}      </div>\n` +
+      appBanner() +
+      foot(updated);
+  }
+  return { pages, live };
+}
+
+/** A market with no live catalog right now keeps its URL (noindex) instead of a 404. */
+export function emptyJurnalPage(slug, name, now = new Date()) {
+  const path = jurnalPath(slug);
+  const crumbs = breadcrumbs([{ name: "Dropy.az", path: "/" }, { name: "Endirim jurnalları", path: JURNAL_HUB }, { name, path }]);
+  return (
+    head({
+      title: `${name} endirim jurnalı | Dropy.az`,
+      description: `${name}-in yeni endirim jurnalı tezliklə. Jurnal çıxanda Dropy.az tətbiqi bildiriş göndərir.`,
+      path,
+      extra: `    <meta name="robots" content="noindex, follow" />\n    ${crumbs.ld}\n`,
+    }) +
+    crumbs.html +
+    `      <h1>${esc(name)} endirim jurnalı</h1>
+      <p class="lead">${esc(name)}-in yeni jurnalı hələ çıxmayıb. <a href="${JURNAL_HUB}">Digər marketlərin jurnallarına bax →</a></p>
+` +
+    appBanner() +
+    foot(now.toISOString())
+  );
+}
+
+/** Reads the market catalogs through the public anon RPCs; null when not configured. */
+export async function fetchMarkets(env = process.env) {
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  const headers = { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
+  const call = async (path, init) => {
+    const res = await fetch(`${url}/rest/v1/${path}`, { headers, ...init });
+    if (!res.ok) throw new Error(`${path.split("?")[0]} HTTP ${res.status}`);
+    return res.json();
+  };
+  const overview = await call("rpc/market_overview", { method: "POST", body: "{}" });
+  const ids = [...new Set(overview.map((r) => r.store_id))];
+  if (!ids.length) return [];
+  const stores = await call(`stores?select=id,slug,name,logo_url&id=in.(${ids.join(",")})`);
+  const subs = await call("subcategories?select=slug,name_az");
+  const subName = new Map(subs.map((s) => [s.slug, s.name_az]));
+  const out = [];
+  for (const st of stores) {
+    const rows = overview.filter((r) => r.store_id === st.id);
+    const items = await call("rpc/market_browse", { method: "POST", body: JSON.stringify({ p_store_id: st.id, p_sort: "discount", p_page_size: JURNAL_FETCH }) });
+    out.push({
+      store: { slug: st.slug, name: st.name, logo_url: st.logo_url },
+      total: rows.reduce((n, r) => n + Number(r.items), 0),
+      endsAt: rows.map((r) => r.ends_at).filter(Boolean).sort().at(-1) ?? null,
+      subcats: rows
+        .filter((r) => r.subcategory_slug && r.subcategory_slug !== "market-diger")
+        .map((r) => ({ name: subName.get(r.subcategory_slug) ?? r.subcategory_slug, count: Number(r.items) }))
+        .sort((a, b) => b.count - a.count),
+      items,
+    });
+  }
+  return out;
+}
+
 // ---------- main ----------
 
 async function main() {
@@ -1023,7 +1221,18 @@ async function main() {
   const rows = await res.json();
   if (!Array.isArray(rows) || rows.length < 50) throw new Error(`feed looks wrong (${Array.isArray(rows) ? rows.length : typeof rows} rows) — refusing to overwrite the site`);
 
-  const { pages, categories, stores, storeCats, campaigns, updated } = buildSite(rows);
+  // Market catalogs are optional: without the env (local runs) or on an API
+  // error the jurnal pages already on disk stay as they are.
+  let markets = null;
+  try {
+    markets = await fetchMarkets();
+  } catch (e) {
+    console.error(`market catalogs skipped: ${e.message}`);
+  }
+  const jurnal = markets ? buildJurnal(markets) : null;
+  const jurnalStores = new Map((jurnal?.live ?? []).map((m) => [m.store.slug, m.total]));
+
+  const { pages, categories, stores, storeCats, campaigns, updated } = buildSite(rows, new Date(), { jurnalStores });
 
   // Regenerated wholesale, so a category that disappears doesn't linger.
   rmSync(join(ROOT, "endirimler"), { recursive: true, force: true });
@@ -1031,6 +1240,23 @@ async function main() {
   rmSync(join(ROOT, "magaza"), { recursive: true, force: true });
   rmSync(join(ROOT, "kampaniya"), { recursive: true, force: true });
   for (const [path, html] of Object.entries(pages)) write(path, html);
+
+  // Market jurnal pages: regenerated wholesale when the RPCs answered; a
+  // market that once had a page keeps its URL (seo/jurnal.json).
+  const jurnalFile = join(ROOT, "seo", "jurnal.json");
+  const jurnalRegistry = existsSync(jurnalFile) ? JSON.parse(readFileSync(jurnalFile, "utf8")) : {};
+  if (jurnal) {
+    rmSync(join(ROOT, JURNAL_HUB), { recursive: true, force: true });
+    for (const [path, html] of Object.entries(jurnal.pages)) write(path, html);
+    for (const m of jurnal.live) jurnalRegistry[m.store.slug] = m.store.name;
+    for (const [slug, name] of Object.entries(jurnalRegistry)) {
+      if (!jurnalStores.has(slug)) write(jurnalPath(slug), emptyJurnalPage(slug, name));
+    }
+    writeFileSync(jurnalFile, JSON.stringify(Object.fromEntries(Object.entries(jurnalRegistry).sort()), null, 2) + "\n");
+  }
+  const jurnalUrls = existsSync(join(ROOT, JURNAL_HUB, "index.html"))
+    ? [JURNAL_HUB, ...Object.keys(jurnalRegistry).filter((s) => !jurnal || jurnalStores.has(s)).map((s) => jurnalPath(s))]
+    : [];
 
   // Stores keep their URL forever (see header comment).
   const registryFile = join(ROOT, "seo", "stores.json");
@@ -1112,7 +1338,7 @@ async function main() {
   // daily and matter most, so Google sees them separately from short-lived deals.
   const day = updated.slice(0, 10);
   const sitemaps = {
-    "sitemap-stores.xml": ["/", "/destek/", "/endirimler/", ...EVENTS.map((ev) => `/endirimler/${ev.slug}/`), "/magazalar/", ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...storeCats.map((sc) => sc.path)],
+    "sitemap-stores.xml": ["/", "/destek/", "/endirimler/", ...EVENTS.map((ev) => `/endirimler/${ev.slug}/`), ...jurnalUrls, "/magazalar/", ...Object.keys(registry).map((s) => `/magaza/${urlSlug(s)}/`), ...storeCats.map((sc) => sc.path)],
     "sitemap-categories.xml": categories.map((c) => `/endirimler/${c.slug}/`),
     "sitemap-deals.xml": campaigns.filter((c) => !isThinCampaign(c)).map((c) => campaignPath(c)),
   };

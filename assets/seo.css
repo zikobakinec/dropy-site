@@ -73,3 +73,9 @@ h2 { font: 700 1.35rem/1.2 Fraunces, Georgia, serif; margin: 34px 0 14px; }
 @media (max-width: 720px) { .deal { grid-template-columns: 1fr; } }
 .season-bar { margin: 14px 0 0; padding: 10px 14px; border-radius: 14px; background: #14213d; font-weight: 700; font-size: 0.95rem; }
 .season-bar a { color: #fff; text-decoration: none; }
+/* Market catalog pages (endirim jurnalı, 2026-11-28) */
+.chips span { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font-size: 0.86rem; font-weight: 600; }
+.chips span b { color: var(--primary); margin-left: 4px; }
+.price { font-size: 0.95rem; }
+.price s { color: #8a90a2; font-weight: 500; margin-right: 4px; }
+.price b { color: var(--primary); font-weight: 800; }

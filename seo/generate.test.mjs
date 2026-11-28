@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage, buildJurnal, emptyJurnalPage, jurnalPath, manat, JURNAL_HUB, JURNAL_TOP } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -298,4 +298,51 @@ test("Black Friday page answers when it is, names stores, and every page links t
   }
   const off = buildSite(rows, new Date("2026-12-10T08:00:00Z")).pages;
   assert.ok(!off["/endirimler/"].includes("season-bar"));
+});
+
+const mItem = (i, pct, price, old) => ({
+  id: `m${i}`, title: `Məhsul ${i}`, discount_type: "percent", discount_value: pct,
+  discount_label: "", price, old_price: old, image_url: i % 2 ? `https://x.test/${i}.jpg` : null,
+});
+const market = (slug, name, n) => ({
+  store: { slug, name, logo_url: "https://x.test/logo.png" },
+  total: n,
+  endsAt: "2026-12-02T19:59:59.999+00:00",
+  subcats: [{ name: "Süd məhsulları və yumurta", count: 40 }],
+  items: Array.from({ length: Math.min(n, 30) }, (_, i) => mItem(i, 60 - i, 3.49, 9.55)),
+});
+
+test("market jurnal pages: title with count and end day, prices, taste only, links between markets (2026-11-28)", () => {
+  const now = new Date("2026-11-28T08:00:00Z");
+  const { pages, live } = buildJurnal([market("araz-market-seed", "Araz Market", 593), market("bravo-seed", "Bravo", 562), market("empty-seed", "Boş", 0)], now);
+  assert.equal(live.length, 2);
+  const araz = pages[jurnalPath("araz-market-seed")];
+  assert.equal(jurnalPath("araz-market-seed"), "/endirim-jurnali/araz-market/");
+  assert.match(araz, /<title>Araz Market endirim jurnalı — 593 məhsul, 2 dekabrdək \(Noyabr 2026\) \| Dropy\.az<\/title>/);
+  assert.match(araz, /<h1>Araz Market endirim jurnalı<\/h1>/);
+  assert.match(araz, /<s>9,55 ₼<\/s> <b>3,49 ₼<\/b>/);
+  assert.equal((araz.match(/<article class="card">/g) || []).length, JURNAL_TOP);
+  assert.match(araz, /Qalan 569 məhsul Dropy\.az tətbiqində/);
+  assert.match(araz, /href="\/endirim-jurnali\/bravo\/">Bravo <b>562<\/b>/);
+  assert.match(araz, /Süd məhsulları və yumurta <b>40<\/b>/);
+  assert.ok(!araz.includes("/kampaniya/"), "market items have no deal pages");
+  assert.ok(!araz.includes("Bakı"));
+  assert.ok(!pages[jurnalPath("empty-seed")], "no page for a market without a live catalog");
+  const hub = pages[JURNAL_HUB];
+  assert.match(hub, /<h1>Market endirim jurnalları<\/h1>/);
+  assert.match(hub, /cəmi <b>1155<\/b> endirimli məhsul/);
+  assert.match(hub, /href="\/endirim-jurnali\/araz-market\/">Araz Market endirim jurnalı<\/a>/);
+});
+
+test("store page links its jurnal and the footer links the hub when markets exist", () => {
+  const { pages } = buildSite([row(1, "bravo", 20, "market")], new Date("2026-11-28T08:00:00Z"), { jurnalStores: new Map([["bravo-seed", 562]]) });
+  assert.match(pages["/magaza/bravo/"], /href="\/endirim-jurnali\/bravo\/">BRAVO endirim jurnalı — 562 məhsul →/);
+  assert.match(pages["/endirimler/"], /href="\/endirim-jurnali\/">Market endirim jurnalları<\/a>/);
+  assert.ok(!buildSite([row(1, "bravo", 20)], new Date("2026-11-28T08:00:00Z")).pages["/endirimler/"].includes("/endirim-jurnali/"));
+});
+
+test("empty jurnal page keeps the URL but is noindex; manat uses comma", () => {
+  assert.match(emptyJurnalPage("neptun-seed", "Neptun"), /noindex, follow/);
+  assert.equal(manat(12.99), "12,99 ₼");
+  assert.equal(manat(null), "");
 });
