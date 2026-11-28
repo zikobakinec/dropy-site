@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage, buildJurnal, emptyJurnalPage, jurnalPath, manat, JURNAL_HUB, JURNAL_TOP } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage, buildJurnal, emptyJurnalPage, jurnalPath, manat, JURNAL_HUB, JURNAL_TOP, catalogLinks } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -345,4 +345,21 @@ test("empty jurnal page keeps the URL but is noindex; manat uses comma", () => {
   assert.match(emptyJurnalPage("neptun-seed", "Neptun"), /noindex, follow/);
   assert.equal(manat(12.99), "12,99 ₼");
   assert.equal(manat(null), "");
+});
+
+test("catalog buttons: one PDF reads 'Jurnalı yüklə (PDF)', several show their titles, nofollow to the store's own file", () => {
+  const one = catalogLinks([{ title: "Arazın Tıq-Tıq Xanımı", source_url: "https://araz.test/j.pdf", end_date: "2026-12-02T19:59:59Z" }], "Araz Market");
+  assert.match(one, /<h2>Araz Market endirim jurnalını vərəqlə<\/h2>/);
+  assert.match(one, /href="https:\/\/araz\.test\/j\.pdf" target="_blank" rel="nofollow noopener">Jurnalı yüklə \(PDF\)<\/a>/);
+  const many = catalogLinks([
+    { title: "Bravo- Hiper", source_url: "https://bravo.test/leaflet-5/", end_date: null },
+    { title: "Bravo- Super", source_url: "https://bravo.test/s.pdf", end_date: null },
+  ], "Bravo");
+  assert.match(many, />Hiper jurnalı<\/a>/);
+  assert.match(many, />Super jurnalı \(PDF\)<\/a>/);
+  assert.match(catalogLinks([{ title: "Rahat Kataloqu (rahat_19_noyabr)", source_url: "https://r.test/a.pdf" }, { title: "Rahat 24-29", source_url: "https://r.test/b.pdf" }], "Rahat"), />Rahat Kataloqu \(PDF\)<\/a>/);
+  assert.equal(catalogLinks([], "X"), "");
+  assert.equal(catalogLinks([{ title: "bad", source_url: "javascript:alert(1)" }], "X"), "");
+  const page = buildJurnal([{ ...market("oba-seed", "OBA Market", 40), catalogs: [{ title: "J", source_url: "https://oba.test/j.pdf", end_date: null }] }], new Date("2026-11-28T08:00:00Z")).pages["/endirim-jurnali/oba/"];
+  assert.match(page, /class="catalogs"/);
 });

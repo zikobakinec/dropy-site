@@ -79,3 +79,7 @@ h2 { font: 700 1.35rem/1.2 Fraunces, Georgia, serif; margin: 34px 0 14px; }
 .price { font-size: 0.95rem; }
 .price s { color: #8a90a2; font-weight: 500; margin-right: 4px; }
 .price b { color: var(--primary); font-weight: 800; }
+.catalogs { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 14px 16px; margin: 14px 0; }
+.catalogs h2 { margin: 0 0 10px; font-size: 1.1rem; }
+.catalogs .stores { display: flex; flex-wrap: wrap; gap: 8px; }
+.catalogs .note { margin: 8px 0 0; font-size: 0.82rem; color: #5c6479; }

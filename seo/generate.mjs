@@ -1071,9 +1071,35 @@ function itemCard(it, storeLogo) {
 `;
 }
 
+/** The market's own catalog files (market_catalogs RPC, migration 0092): one button each. */
+export function catalogLinks(catalogs, name) {
+  const list = (catalogs ?? []).filter((c) => isHttpUrl(c.source_url));
+  if (!list.length) return "";
+  const many = list.length > 1;
+  // File names in titles ("(rahat_market_19_noyabr_2_dekabr)") read as junk; a shared
+  // "Bravo-da yeni il təmizliyi- " prefix leaves just "Ekspress", "Hiper"...
+  const clean = list.map((c) => String(c.title ?? "").replace(/\s*\([^)]*_[^)]*\)/g, "").trim());
+  const dash = clean.map((t) => t.lastIndexOf("- "));
+  const prefix = many && dash.every((i) => i > 0) && new Set(clean.map((t, k) => t.slice(0, dash[k]))).size === 1;
+  const titles = clean.map((t, k) => (prefix ? `${t.slice(dash[k] + 2).trim()} jurnalı` : t || "Jurnal"));
+  return `      <section class="catalogs">
+        <h2>${esc(name)} endirim jurnalını vərəqlə</h2>
+        <div class="stores">${list
+          .map((c, k) => {
+            const pdf = /\.pdf(\?|#|$)/i.test(c.source_url);
+            const label = many ? titles[k] : pdf ? "Jurnalı yüklə (PDF)" : "Jurnala bax";
+            return `<a class="btn" href="${esc(c.source_url)}" target="_blank" rel="nofollow noopener">${esc(label)}${many && pdf ? " (PDF)" : ""}</a>`;
+          })
+          .join("")}</div>
+        <p class="note">Jurnal ${esc(name)}-in öz saytında açılır.</p>
+      </section>
+`;
+}
+
 /**
  * Market pages from the RPC data: markets = [{ store: {slug, name, logo_url},
- * total, endsAt, subcats: [{name, count}], items: [market_browse rows] }].
+ * total, endsAt, subcats: [{name, count}], items: [market_browse rows],
+ * catalogs: [{title, source_url, end_date}] }].
  */
 export function buildJurnal(markets, now = new Date()) {
   const updated = now.toISOString();
@@ -1106,6 +1132,7 @@ export function buildJurnal(markets, now = new Date()) {
       <p class="lead"><b>${m.total}</b> endirimli məhsul${best ? `, ${best}%-dək` : ""}${ends ? ` · ${esc(ends)} tarixinədək` : ""}.</p>
       <p class="intro">${esc(name)}-in bu həftəki endirim jurnalındakı (kataloqundakı) məhsullar burada siyahı şəklində: jurnalı vərəqləmədən məhsulun köhnə və yeni qiymətinə bax. Siyahı hər gün yenilənir, jurnal bitəndə yenisi əlavə olunur. Bütün ${m.total} məhsulu, axtarışı və alış-veriş siyahısını Dropy.az tətbiqinin Market bölməsində tapa bilərsən.</p>
 ` +
+      catalogLinks(m.catalogs, name) +
       (m.subcats.length
         ? `      <div class="chips">${m.subcats.map((c) => `<span>${esc(c.name)} <b>${c.count}</b></span>`).join("")}</div>\n`
         : "") +
@@ -1195,6 +1222,12 @@ export async function fetchMarkets(env = process.env) {
   const stores = await call(`stores?select=id,slug,name,logo_url&id=in.(${ids.join(",")})`);
   const subs = await call("subcategories?select=slug,name_az");
   const subName = new Map(subs.map((s) => [s.slug, s.name_az]));
+  let catalogs = [];
+  try {
+    catalogs = await call("rpc/market_catalogs", { method: "POST", body: "{}" });
+  } catch (e) {
+    console.error(`market catalog files skipped: ${e.message}`);
+  }
   const out = [];
   for (const st of stores) {
     const rows = overview.filter((r) => r.store_id === st.id);
@@ -1208,6 +1241,7 @@ export async function fetchMarkets(env = process.env) {
         .map((r) => ({ name: subName.get(r.subcategory_slug) ?? r.subcategory_slug, count: Number(r.items) }))
         .sort((a, b) => b.count - a.count),
       items,
+      catalogs: catalogs.filter((c) => c.store_id === st.id).map((c) => ({ title: c.title, source_url: c.source_url, end_date: c.end_date })),
     });
   }
   return out;
