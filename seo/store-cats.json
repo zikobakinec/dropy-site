@@ -95,6 +95,18 @@
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
   },
+  "/magaza/emporium/geyim/": {
+    "store": "Emporium",
+    "storeSlug": "emporium-seed",
+    "cat": "Geyim və ayaqqabı",
+    "catSlug": "geyim"
+  },
+  "/magaza/emporium/gozellik/": {
+    "store": "Emporium",
+    "storeSlug": "emporium-seed",
+    "cat": "Gözəllik və baxım",
+    "catSlug": "gozellik"
+  },
   "/magaza/era-electronics/elektronika/": {
     "store": "ERA Electronics",
     "storeSlug": "era-electronics-seed",
@@ -179,6 +191,12 @@
     "cat": "Ev və bağ",
     "catSlug": "ev-ve-bag"
   },
+  "/magaza/music-gallery/meiset-texnikasi/": {
+    "store": "Music Gallery",
+    "storeSlug": "music-gallery-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
   "/magaza/myfilter-az-mv24szib/meiset-texnikasi/": {
     "store": "Myfilter.az",
     "storeSlug": "myfilter-az-mv24szib",
@@ -224,6 +242,18 @@
   "/magaza/rossmann/meiset-texnikasi/": {
     "store": "Rossmann",
     "storeSlug": "rossmann-seed",
+    "cat": "Məişət texnikası",
+    "catSlug": "meiset-texnikasi"
+  },
+  "/magaza/seehome/elektronika/": {
+    "store": "SeeHome",
+    "storeSlug": "seehome-seed",
+    "cat": "Elektronika",
+    "catSlug": "elektronika"
+  },
+  "/magaza/seehome/meiset-texnikasi/": {
+    "store": "SeeHome",
+    "storeSlug": "seehome-seed",
     "cat": "Məişət texnikası",
     "catSlug": "meiset-texnikasi"
   },
