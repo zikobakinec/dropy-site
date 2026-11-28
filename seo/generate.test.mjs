@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage, buildJurnal, emptyJurnalPage, jurnalPath, manat, JURNAL_HUB, JURNAL_TOP, catalogLinks } from "./generate.mjs";
+import { esc, jsonLd, badge, spreadByStore, urlSlug, injectLanding, buildSite, slugify, campaignPath, pricePair, endedCampaignPage, campaignPage, isThinCampaign, landingDeals, dealsBlock, storesBlock, injectBetween, applyLanding, LANDING_DEALS, DEALS_START, DEALS_END, STORES_START, STORES_END, EVENTS, eventPhase, eventInSeason, shareStubPage, shareLinkPath, storeTitle, storeDescription, redirectPage, thumb, buildJurnal, emptyJurnalPage, jurnalPath, manat, JURNAL_HUB, JURNAL_TOP, catalogLinks } from "./generate.mjs";
 
 const row = (id, store, pct, cat = "elektronika") => ({
   id,
@@ -122,7 +122,7 @@ test("storesBlock shows a logo or the store's initials, and links to the store p
     { slug: "era-seed", name: "ERA", items: [{ stores: { logo_url: "https://era.az/l.png" } }] },
     { slug: "bravo-seed", name: "Bravo Market", items: [{ stores: { logo_url: null } }] },
   ]);
-  assert.match(html, /href="\/magaza\/era\/"[\s\S]*src="https:\/\/era.az\/l.png"/);
+  assert.match(html, /href="\/magaza\/era\/"[\s\S]*src="https:\/\/wsrv\.nl\/\?url=https%3A%2F%2Fera\.az%2Fl\.png&amp;w=160/);
   assert.match(html, /href="\/magaza\/bravo\/"[\s\S]*>BM</);
 });
 
@@ -212,7 +212,7 @@ test("shared deal link page previews the deal's own photo and discount", () => {
   const c = { id: "6fb58678-a39e-4e51-bb22-198823071174", title: "Kukla <Barbie>", discount_type: "percent", discount_value: 40, image_url: "https://img.example/b.jpg", stores: { slug: "supertoys-seed", name: "Supertoys", logo_url: null } };
   assert.equal(shareLinkPath(c), "/a/k/6fb58678-a39e-4e51-bb22-198823071174/");
   const html = shareStubPage(c, "/kampaniya/kukla-barbie-6fb58678/");
-  assert.ok(html.includes('<meta property="og:image" content="https://img.example/b.jpg" />'));
+  assert.ok(html.includes('<meta property="og:image" content="https://wsrv.nl/?url=https%3A%2F%2Fimg.example%2Fb.jpg&amp;w=1080&amp;we&amp;output=jpg&amp;q=78&amp;default=1" />'));
   assert.ok(html.includes('<meta property="og:title" content="-40% · Kukla &lt;Barbie&gt;" />'));
   assert.ok(html.includes('href="/kampaniya/kukla-barbie-6fb58678/"'));
   assert.match(html, /noindex/);
@@ -363,4 +363,13 @@ test("catalog buttons: one PDF reads 'Jurnalı yüklə (PDF)', several show thei
   assert.equal(catalogLinks([{ title: "bad", source_url: "javascript:alert(1)" }], "X"), "");
   const page = buildJurnal([{ ...market("oba-seed", "OBA Market", 40), catalogs: [{ title: "J", source_url: "https://oba.test/j.pdf", end_date: null }] }], new Date("2026-11-28T08:00:00Z")).pages["/endirim-jurnali/oba/"];
   assert.match(page, /class="catalogs"/);
+});
+
+test("photos go through wsrv so iPhone HEIC uploads show in every browser (2026-11-28)", () => {
+  assert.equal(thumb("https://x.supabase.co/a/1795-heic"), "https://wsrv.nl/?url=https%3A%2F%2Fx.supabase.co%2Fa%2F1795-heic&w=480&we&output=webp&q=78&default=1");
+  assert.equal(thumb("/assets/icon.png"), "/assets/icon.png");
+  const once = thumb("https://a.test/p.jpg");
+  assert.equal(thumb(once), once, "never double-proxied");
+  const { pages } = buildSite([row(1, "era", 40)], new Date("2026-10-16T08:00:00Z"));
+  assert.match(pages["/magaza/era/"], /<img src="https:\/\/wsrv\.nl\/\?url=https%3A%2F%2Fshop\.az%2F1\.jpg&amp;w=480/);
 });

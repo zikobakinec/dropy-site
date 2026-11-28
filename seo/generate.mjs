@@ -210,6 +210,19 @@ export function pricePair(text) {
   return Number.isFinite(oldPrice) && Number.isFinite(newPrice) && newPrice > 0 && newPrice < oldPrice ? { oldPrice, newPrice } : undefined;
 }
 
+// Photos go through wsrv.nl, like the app (apps/mobile/src/lib/image-url.ts):
+// store owners upload straight from iPhones, and a HEIC original (~1 MB) shows
+// as a broken image in every browser except Safari (A'Fandy cards, user
+// screenshot 2026-11-28); wsrv decodes it and serves a small WebP/JPEG.
+// `default=1` falls back to the original when the proxy can't fetch it.
+const IMAGE_PROXY = "https://wsrv.nl/";
+
+/** Resized, browser-safe URL for a remote photo; local paths pass through. */
+export function thumb(url, w = 480, format = "webp") {
+  if (!isHttpUrl(url) || url.startsWith(IMAGE_PROXY)) return url;
+  return `${IMAGE_PROXY}?url=${encodeURIComponent(url)}&w=${w}&we&output=${format}&q=78&default=1`;
+}
+
 export function isHttpUrl(u) {
   return typeof u === "string" && /^https?:\/\//i.test(u);
 }
@@ -298,7 +311,7 @@ function card(c, { showStore = true } = {}) {
   const href = campaignPath(c);
   const ends = c.end_date && !c.end_date_estimated ? `<span class="ends">Son tarix: ${esc(azDate(c.end_date))}</span>` : "";
   return `        <article class="card">
-          <a class="card-img" href="${esc(href)}"><img src="${esc(img)}" alt="${esc(c.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(c))}</span></a>
+          <a class="card-img" href="${esc(href)}"><img src="${esc(thumb(img))}" alt="${esc(c.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(c))}</span></a>
           <div class="card-body">
             ${showStore ? `<a class="store" href="/magaza/${esc(urlSlug(store.slug))}/">${esc(store.name)}</a>` : ""}
             <h3><a href="${esc(href)}">${esc(c.title)}</a></h3>
@@ -719,7 +732,7 @@ export function campaignPage(c, similar, updated) {
   const store = c.stores;
   const cat = c.categories;
   const b = badge(c);
-  const img = isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`;
+  const img = thumb(isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`, 1080, "jpg");
   const realEnd = c.end_date && !c.end_date_estimated;
   const prices = pricePair(c.discount_label) ?? pricePair(c.description);
   const desc = cleanDescription(c.description, c.title);
@@ -803,7 +816,7 @@ export function shareLinkPath(c) {
 export function shareStubPage(c, webPath) {
   const store = c.stores;
   const b = badge(c);
-  const img = isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`;
+  const img = thumb(isHttpUrl(c.image_url) ? c.image_url : isHttpUrl(store.logo_url) ? store.logo_url : `${SITE}/assets/icon.png`, 1080, "jpg");
   const title = `${b} · ${c.title}`;
   const desc = `${store.name} — Dropy.az tətbiqində bax`;
   const path = shareLinkPath(c);
@@ -943,7 +956,7 @@ export function dealsBlock(items) {
       const href = esc(campaignPath(c));
       return `
           <a class="deal-card" href="${href}">
-            <span class="deal-img"><img src="${esc(c.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">${esc(badge(c))}</span></span>
+            <span class="deal-img"><img src="${esc(thumb(c.image_url))}" alt=""" loading="lazy" referrerpolicy="no-referrer" /><span class="deal-badge">${esc(badge(c))}</span></span>
             <span class="deal-store">${esc(c.stores?.name ?? "")}</span>
             <span class="deal-title">${esc(c.title)}</span>
           </a>`;
@@ -965,7 +978,7 @@ export function storesBlock(stores) {
     .map((s) => {
       const logo = s.items.find((c) => isHttpUrl(c.stores?.logo_url))?.stores.logo_url;
       const mark = logo
-        ? `<img src="${esc(logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+        ? `<img src="${esc(thumb(logo, 160))}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
         : `<span class="store-initials">${esc(initials(s.name))}</span>`;
       return `
           <a class="store-chip" href="/magaza/${esc(urlSlug(s.slug))}/">${mark}<span>${esc(s.name)}</span></a>`;
@@ -1067,7 +1080,7 @@ function itemPrice(it) {
 function itemCard(it, storeLogo) {
   const img = isHttpUrl(it.image_url) ? it.image_url : isHttpUrl(storeLogo) ? storeLogo : "/assets/icon.png";
   return `        <article class="card">
-          <div class="card-img"><img src="${esc(img)}" alt="${esc(it.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(it))}</span></div>
+          <div class="card-img"><img src="${esc(thumb(img))}" alt="${esc(it.title)}" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${esc(badge(it))}</span></div>
           <div class="card-body">
             <h3>${esc(it.title)}</h3>
             <span class="price">${itemPrice(it)}</span>
@@ -1176,7 +1189,7 @@ export function buildJurnal(markets, now = new Date()) {
         .map((m) => {
           const cover = m.items.find((it) => isHttpUrl(it.image_url))?.image_url ?? m.store.logo_url ?? "/assets/icon.png";
           return `        <article class="card">
-          <a class="card-img" href="${jurnalPath(m.store.slug)}"><img src="${esc(cover)}" alt="${esc(m.store.name)} endirim jurnalı" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${m.total} məhsul</span></a>
+          <a class="card-img" href="${jurnalPath(m.store.slug)}"><img src="${esc(thumb(cover))}" alt="${esc(m.store.name)} endirim jurnalı" loading="lazy" referrerpolicy="no-referrer" /><span class="badge">${m.total} məhsul</span></a>
           <div class="card-body">
             <h3><a href="${jurnalPath(m.store.slug)}">${esc(m.store.name)} endirim jurnalı</a></h3>
             ${m.endsAt ? `<span class="ends">${esc(azDay(m.endsAt))} tarixinədək</span>` : ""}
