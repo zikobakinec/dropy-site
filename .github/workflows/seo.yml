@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: "30 7 * * *"   # 11:30 Baku
     - cron: "30 18 * * *"  # 22:30 Baku
+    # Market catalogs are read 6 times a day (market-catalogs.yml in the app
+    # repo, :41 past 04/09/12/15/18/21 UTC); the jurnal pages follow ~30 min
+    # later so the site shows the same products as the app (user, 2026-11-28).
+    - cron: "15 5,10,13,16,19,22 * * *"
   workflow_dispatch:
 
 permissions:

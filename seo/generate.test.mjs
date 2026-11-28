@@ -323,6 +323,7 @@ test("market jurnal pages: title with count and end day, prices, taste only, lin
   assert.match(araz, /<s>9,55 ₼<\/s> <b>3,49 ₼<\/b>/);
   assert.equal((araz.match(/<article class="card">/g) || []).length, JURNAL_TOP);
   assert.match(araz, /Qalan 569 məhsul Dropy\.az tətbiqində/);
+  assert.match(araz, /href="\/a\/\?m=araz-market-seed" rel="nofollow">Bütün 593 məhsulu tətbiqdə aç</);
   assert.match(araz, /href="\/endirim-jurnali\/bravo\/">Bravo <b>562<\/b>/);
   assert.match(araz, /Süd məhsulları və yumurta <b>40<\/b>/);
   assert.ok(!araz.includes("/kampaniya/"), "market items have no deal pages");

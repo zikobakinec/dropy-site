@@ -1035,6 +1035,11 @@ export const JURNAL_HUB = "/endirim-jurnali/";
 export const JURNAL_TOP = 24;
 const JURNAL_FETCH = 100;
 
+/** The app's own share link for a store (dropy.az/a/?m=<slug>): opens it inside Dropy.az. */
+export function appStoreLink(storeSlug) {
+  return `/a/?m=${encodeURIComponent(storeSlug)}`;
+}
+
 export function jurnalPath(storeSlug) {
   return `${JURNAL_HUB}${urlSlug(storeSlug)}/`;
 }
@@ -1130,8 +1135,9 @@ export function buildJurnal(markets, now = new Date()) {
       crumbs.html +
       `      <h1>${esc(name)} endirim jurnalı</h1>
       <p class="lead"><b>${m.total}</b> endirimli məhsul${best ? `, ${best}%-dək` : ""}${ends ? ` · ${esc(ends)} tarixinədək` : ""}.</p>
-      <p class="intro">${esc(name)}-in bu həftəki endirim jurnalındakı (kataloqundakı) məhsullar burada siyahı şəklində: jurnalı vərəqləmədən məhsulun köhnə və yeni qiymətinə bax. Siyahı hər gün yenilənir, jurnal bitəndə yenisi əlavə olunur. Bütün ${m.total} məhsulu, axtarışı və alış-veriş siyahısını Dropy.az tətbiqinin Market bölməsində tapa bilərsən.</p>
+      <p class="intro">${esc(name)}-in bu həftəki endirim jurnalındakı (kataloqundakı) məhsullar burada siyahı şəklində: jurnalı vərəqləmədən məhsulun köhnə və yeni qiymətinə bax. Məhsullar və qiymətlər Dropy.az tətbiqindəki ilə eynidir və gün ərzində bir neçə dəfə yenilənir; jurnal bitəndə yenisi əlavə olunur. Bütün ${m.total} məhsulu, axtarışı və alış-veriş siyahısını Dropy.az tətbiqinin Market bölməsində tapa bilərsən.</p>
 ` +
+      `      <p><a class="btn" href="${appStoreLink(m.store.slug)}" rel="nofollow">Bütün ${m.total} məhsulu tətbiqdə aç</a></p>\n` +
       catalogLinks(m.catalogs, name) +
       (m.subcats.length
         ? `      <div class="chips">${m.subcats.map((c) => `<span>${esc(c.name)} <b>${c.count}</b></span>`).join("")}</div>\n`
@@ -1140,7 +1146,7 @@ export function buildJurnal(markets, now = new Date()) {
       `      <h2>Ən böyük endirimlər</h2>\n` +
       `      <div class="grid">\n${shown.map((it) => itemCard(it, m.store.logo_url)).join("")}      </div>\n` +
       (m.total > shown.length
-        ? `      <p class="lead"><b>Qalan ${m.total - shown.length} məhsul Dropy.az tətbiqində.</b> Yeni jurnal çıxanda tətbiq bildiriş göndərir.</p>\n`
+        ? `      <p class="lead"><a href="${appStoreLink(m.store.slug)}" rel="nofollow"><b>Qalan ${m.total - shown.length} məhsul Dropy.az tətbiqində →</b></a> Yeni jurnal çıxanda tətbiq bildiriş göndərir.</p>\n`
         : "") +
       (others.length
         ? `      <h2>Digər marketlərin endirim jurnalları</h2>\n      <div class="chips">${others.map((o) => `<a href="${jurnalPath(o.store.slug)}">${esc(o.store.name)} <b>${o.total}</b></a>`).join("")}</div>\n`
